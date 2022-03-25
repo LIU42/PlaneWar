@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="planewar.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="planewar.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="config.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="global.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="PlaneWar.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Img\icon.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\background.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy0_1.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy0_2.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy0_3.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy0_4.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy0_5.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy0_6.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy1_1.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy1_2.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy1_3.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy1_4.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy1_5.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy1_6.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy1_7.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy2_1.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy2_2.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy2_3.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy2_4.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy2_5.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy2_6.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy2_7.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy2_8.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy2_9.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy2_10.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\hero1.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\hero2.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\hero3.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\hero4.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\hero5.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\hero6.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\hero7.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy1_bullet.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\enemy2_bullet.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Img\hero_bullet.png">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
