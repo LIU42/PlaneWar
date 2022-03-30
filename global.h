@@ -4,7 +4,6 @@
 using namespace std;
 
 HINSTANCE hinstance;
-SDL_RWops* src;
 SDL_Window* window;
 SDL_Surface* surface;
 SDL_Rect surface_rect;
@@ -15,8 +14,6 @@ SDL_Rect overflow_rect_dst;
 SDL_Event event;
 SDL_PixelFormat* format;
 
-SDL_Surface* temp_origin;
-SDL_Surface* temp_zoom;
 SDL_Surface* image;
 SDL_Surface* background;
 SDL_Surface* hero_bullet_img;

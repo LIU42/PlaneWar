@@ -13,27 +13,25 @@ SDL_RWops* get_resource(HINSTANCE hinst, LPCWSTR name, LPCWSTR type)
 	return SDL_RWFromConstMem(data, size);
 }
 
-SDL_Surface* load_surface(DWORD ID, int width, int height, double img_width, double img_height)
+SDL_Surface* load_surface(DWORD ID)
 {
-	src = get_resource(hinstance, MAKEINTRESOURCE(ID), TEXT("PNG"));
-	temp_origin = IMG_LoadPNG_RW(src);
-	temp_zoom = rotozoomSurfaceXY(temp_origin, 0, width / img_width, height / img_height, 1);
-	image = SDL_ConvertSurface(temp_zoom, format, NULL);
-	SDL_FreeSurface(temp_origin);
-	SDL_FreeSurface(temp_zoom);
+	SDL_RWops* src = get_resource(hinstance, MAKEINTRESOURCE(ID), TEXT("PNG"));
+	SDL_Surface* origin_image = IMG_LoadPNG_RW(src);
+	SDL_Surface* convert_image = SDL_ConvertSurface(origin_image, format, NULL);
+	SDL_FreeSurface(origin_image);
 	SDL_FreeRW(src);
-	return image;
+	return convert_image;
 }
 
 Uint32 create_hero_change(Uint32 interval, void* param)
 {
-	if (game.status == playing) { hero.change_img(); }
+	if (game.status == playing) { hero.change_appearance(); }
 	return interval;
 }
 
 Uint32 create_enemy2_change(Uint32 interval,void* param)
 {
-	if (game.status == playing) { for (int i = 0; i < enemy2.size(); i++) { enemy2[i].change_img(); } }
+	if (game.status == playing) { for (int i = 0; i < enemy2.size(); i++) { enemy2[i].change_appearance(); } }
 	return interval;
 }
 
@@ -153,15 +151,15 @@ void Game::set_window()
 
 void Game::load_image()
 {
-	background = load_surface(IDB_PNG1, screen_width, screen_height, 480.0, 852.0);
-	hero_bullet_img = load_surface(IDB_PNG34, hero_bullet_width, hero_bullet_height, 9.0, 21.0);
-	enemy1_bullet_img = load_surface(IDB_PNG32, enemy1_bullet_width, enemy1_bullet_height, 9.0, 21.0);
-	enemy2_bullet_img = load_surface(IDB_PNG33, enemy2_bullet_width, enemy2_bullet_height, 22.0, 22.0);
+	background = load_surface(IDB_PNG1);
+	hero_bullet_img = load_surface(IDB_PNG34);
+	enemy1_bullet_img = load_surface(IDB_PNG32);
+	enemy2_bullet_img = load_surface(IDB_PNG33);
 
-	for (int i = 0; i < hero_img_max; i++) { hero_img[i] = load_surface(IDB_PNG25 + i, hero_width, hero_height, 100.0, 124.0); }
-	for (int i = 0; i < enemy0_img_max; i++) { enemy0_img[i] = load_surface(IDB_PNG2 + i, enemy0_width, enemy0_height, 51.0, 39.0); }
-	for (int i = 0; i < enemy1_img_max; i++) { enemy1_img[i] = load_surface(IDB_PNG8 + i, enemy1_width, enemy1_height, 69.0, 89.0); }
-	for (int i = 0; i < enemy2_img_max; i++) { enemy2_img[i] = load_surface(IDB_PNG15 + i, enemy2_width, enemy2_height, 165.0, 256.0); }
+	for (int i = 0; i < hero_img_max; i++) { hero_img[i] = load_surface(IDB_PNG25 + i); }
+	for (int i = 0; i < enemy0_img_max; i++) { enemy0_img[i] = load_surface(IDB_PNG2 + i); }
+	for (int i = 0; i < enemy1_img_max; i++) { enemy1_img[i] = load_surface(IDB_PNG8 + i); }
+	for (int i = 0; i < enemy2_img_max; i++) { enemy2_img[i] = load_surface(IDB_PNG15 + i); }
 }
 
 void Game::load_fonts()
@@ -348,10 +346,10 @@ void Aircraft::down(int count)
 	}
 }
 
-void Aircraft::change_img()
+void Aircraft::change_appearance()
 {
-	if (change == appearance1) { change = appearance2; }
-	else { change = appearance1; }
+	if (appearance == appearance1) { appearance = appearance2; }
+	else { appearance = appearance1; }
 }
 
 void Bullet::move(int speed) { rect.y += speed; }
@@ -375,7 +373,7 @@ void Hero::init()
 	rect = { screen_width / 2 - hero_width / 2,screen_height - hero_height - 40,hero_width,hero_height };
 	hp = hero_hp;
 	status = alive_status;
-	change = appearance1;
+	appearance = appearance1;
 	bomb_count = hero_bomb_init_count;
 }
 
@@ -431,8 +429,8 @@ void Hero::display()
 {
 	if (status == alive_status)
 	{
-		if (change == appearance1) { image = hero_img[0]; }
-		else if (change = appearance2) { image = hero_img[1]; }
+		if (appearance == appearance1) { image = hero_img[0]; }
+		else if (appearance = appearance2) { image = hero_img[1]; }
 	}
 	else { image = hero_img[status + 1]; }
 	SDL_BlitSurface(image, NULL, surface, &rect);
@@ -443,7 +441,7 @@ Enemy0::Enemy0(int enemy_x, int enemy_y)
 	rect = { enemy_x,enemy_y,enemy0_width,enemy0_height };
 	hp = enemy0_hp;
 	status = alive_status;
-	change = appearance1;
+	appearance = appearance1;
 }
 
 void Enemy0::display()
@@ -457,7 +455,7 @@ Enemy1::Enemy1(int enemy_x, int enemy_y)
 	rect = { enemy_x,enemy_y,enemy1_width,enemy1_height };
 	hp = enemy1_hp;
 	status = alive_status;
-	change = appearance1;
+	appearance = appearance1;
 }
 
 void Enemy1::fire()
@@ -484,7 +482,7 @@ Enemy2::Enemy2(int enemy_x, int enemy_y)
 {
 	rect = { enemy_x,enemy_y,enemy2_width,enemy2_height };
 	hp = enemy2_hp;
-	change = appearance1;
+	appearance = appearance1;
 	status = alive_status;
 }
 
@@ -502,8 +500,8 @@ void Enemy2::display()
 {
 	if (status == alive_status && hp > enemy2_hp / 2)
 	{
-		if (change == appearance1) { image = enemy2_img[0]; }
-		else if (change == appearance2) { image = enemy2_img[1]; }
+		if (appearance == appearance1) { image = enemy2_img[0]; }
+		else if (appearance == appearance2) { image = enemy2_img[1]; }
 	}
 	else if (status == 0 && hp <= enemy2_hp / 2) { image = enemy2_img[2]; }
 	else { image = enemy2_img[status + 2]; }

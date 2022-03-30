@@ -2,7 +2,6 @@
 #define __PLANEWAR_H__
 
 #include <SDL.h>
-#include <SDL_gfx.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 #include <Windows.h>
@@ -39,10 +38,10 @@ class Aircraft
 		SDL_Rect rect;
 		int hp;
 		int status;
-		int change;
+		int appearance;
 
 	public:
-		void change_img();
+		void change_appearance();
 		void move(int);
 		void down(int);
 		void miss(int);

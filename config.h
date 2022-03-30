@@ -2,7 +2,7 @@
 #define __CONFIG_H__
 
 #define title "Plane War"
-#define screen_width 460
+#define screen_width 450
 #define screen_height 700
 #define game_fps 60
 
