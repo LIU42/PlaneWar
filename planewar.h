@@ -10,28 +10,6 @@
 
 using namespace std;
 
-class Game
-{
-	public:
-		int status;
-		int score;
-		int score_best;
-		int background_position;
-		const Uint8* keystatus;
-
-	public:
-		Game();
-		void init();
-		void set_window();
-		void load_image();
-		void load_fonts();
-		void add_timer();
-		void exit_game();
-		void update();
-		void events();
-		void display();
-};
-
 class Aircraft
 {
 	public:
@@ -121,6 +99,81 @@ class Enemy2_bullet : public Bullet
 {
 	public:
 		Enemy2_bullet(int, int);
+};
+
+class Game
+{
+	public:
+		int status;
+		int score;
+		int score_best;
+		int background_position;
+		const Uint8* keystatus;
+
+	public:
+		HINSTANCE hinstance;
+		SDL_Window* window;
+		SDL_Surface* surface;
+		SDL_Rect surface_rect;
+		SDL_Rect background_rect_self;
+		SDL_Rect background_rect_dst;
+		SDL_Rect overflow_rect_self;
+		SDL_Rect overflow_rect_dst;
+		SDL_Event event;
+		SDL_PixelFormat* format;
+
+	public:
+		SDL_Surface* image;
+		SDL_Surface* background;
+		SDL_Surface* hero_bullet_img;
+		SDL_Surface* enemy1_bullet_img;
+		SDL_Surface* enemy2_bullet_img;
+		SDL_Surface* hero_img[7];
+		SDL_Surface* enemy0_img[6];
+		SDL_Surface* enemy1_img[7];
+		SDL_Surface* enemy2_img[10];
+
+	public:
+		TTF_Font* font_title;
+		TTF_Font* font_info;
+		SDL_Surface* text_surface;
+		SDL_Rect text_rect;
+		SDL_Color black;
+		SDL_Color red;
+
+	public:
+		SDL_TimerID hero_change;
+		SDL_TimerID hero_fire;
+		SDL_TimerID enemy1_fire;
+		SDL_TimerID enemy2_change;
+		SDL_TimerID enemy2_fire;
+		SDL_TimerID aircraft_down;
+		SDL_TimerID alive;
+
+	public:
+		default_random_engine random;
+		uniform_real_distribution <double> randdouble;
+
+	public:
+		Hero hero;
+		vector <Enemy0> enemy0;
+		vector <Enemy1> enemy1;
+		vector <Enemy2> enemy2;
+		vector <Hero_bullet> hero_bullet;
+		vector <Enemy1_bullet> enemy1_bullet;
+		vector <Enemy2_bullet> enemy2_bullet;
+
+	public:
+		Game();
+		void init();
+		void set_window();
+		void load_image();
+		void load_fonts();
+		void add_timer();
+		void exit_game();
+		void update();
+		void events();
+		void display();
 };
 
 extern Game game;

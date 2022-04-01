@@ -166,7 +166,6 @@
   <ItemGroup>
     <ClInclude Include="config.h" />
     <ClInclude Include="planewar.h" />
-    <ClInclude Include="global.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
