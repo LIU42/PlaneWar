@@ -156,7 +156,6 @@ void Game::load_image()
 	hero_bullet_img = load_surface(IDB_PNG34);
 	enemy1_bullet_img = load_surface(IDB_PNG32);
 	enemy2_bullet_img = load_surface(IDB_PNG33);
-
 	for (int i = 0; i < hero_img_max; i++) { hero_img[i] = load_surface(IDB_PNG25 + i); }
 	for (int i = 0; i < enemy0_img_max; i++) { enemy0_img[i] = load_surface(IDB_PNG2 + i); }
 	for (int i = 0; i < enemy1_img_max; i++) { enemy1_img[i] = load_surface(IDB_PNG8 + i); }
