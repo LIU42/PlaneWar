@@ -192,6 +192,7 @@ void Game::exit_game()
 	SDL_FreeSurface(hero_bullet_img);
 	SDL_FreeSurface(enemy1_bullet_img);
 	SDL_FreeSurface(enemy2_bullet_img);
+
 	for (int i = 0; i < hero_img_max; i++) { SDL_FreeSurface(hero_img[i]); }
 	for (int i = 0; i < enemy0_img_max; i++) { SDL_FreeSurface(enemy0_img[i]); }
 	for (int i = 0; i < enemy1_img_max; i++) { SDL_FreeSurface(enemy1_img[i]); }
