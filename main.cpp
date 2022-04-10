@@ -1,5 +1,4 @@
 #include "planewar.h"
-#include "config.h"
 
 using namespace std;
 

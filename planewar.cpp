@@ -1,6 +1,4 @@
 #include "planewar.h"
-#include "config.h"
-#include "resource.h"
 
 using namespace std;
 
@@ -113,6 +111,7 @@ void display_background()
 	game.background_rect_self = { 0,0,screen_width,screen_height - game.background_position };
 	game.background_rect_dst = { 0,game.background_position,screen_width,screen_height - game.background_position };
 	SDL_BlitSurface(game.background, &game.background_rect_self, game.surface, &game.background_rect_dst);
+
 	game.background_rect_self = { 0,screen_height - game.background_position,screen_width,game.background_position };
 	game.background_rect_dst = { 0,0,screen_width,game.background_position };
 	SDL_BlitSurface(game.background, &game.background_rect_self, game.surface, &game.background_rect_dst);
@@ -156,6 +155,7 @@ void Game::load_image()
 	hero_bullet_img = load_surface(IDB_PNG34);
 	enemy1_bullet_img = load_surface(IDB_PNG32);
 	enemy2_bullet_img = load_surface(IDB_PNG33);
+
 	for (int i = 0; i < hero_img_max; i++) { hero_img[i] = load_surface(IDB_PNG25 + i); }
 	for (int i = 0; i < enemy0_img_max; i++) { enemy0_img[i] = load_surface(IDB_PNG2 + i); }
 	for (int i = 0; i < enemy1_img_max; i++) { enemy1_img[i] = load_surface(IDB_PNG8 + i); }
@@ -187,6 +187,7 @@ void Game::exit_game()
 	TTF_CloseFont(font_title);
 	TTF_CloseFont(font_info);
 	SDL_FreeFormat(format);
+
 	SDL_FreeSurface(background);
 	SDL_FreeSurface(hero_bullet_img);
 	SDL_FreeSurface(enemy1_bullet_img);
@@ -195,6 +196,7 @@ void Game::exit_game()
 	for (int i = 0; i < enemy0_img_max; i++) { SDL_FreeSurface(enemy0_img[i]); }
 	for (int i = 0; i < enemy1_img_max; i++) { SDL_FreeSurface(enemy1_img[i]); }
 	for (int i = 0; i < enemy2_img_max; i++) { SDL_FreeSurface(enemy2_img[i]); }
+
 	SDL_Quit();
 	exit(0);
 }
