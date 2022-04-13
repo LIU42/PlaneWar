@@ -72,24 +72,24 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)Build\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)Build\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)Build\$(Configuration) ($(PlatformShortName))\</OutDir>
+    <IntDir>$(SolutionDir)Build\$(Configuration) ($(PlatformShortName))\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)Build\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)Build\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)Build\$(Configuration) ($(PlatformShortName))\</OutDir>
+    <IntDir>$(SolutionDir)Build\$(Configuration) ($(PlatformShortName))\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <ExternalIncludePath>E:\C++\SDL\include;$(ExternalIncludePath)</ExternalIncludePath>
-    <OutDir>$(SolutionDir)Build\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)Build\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)Build\$(Configuration) ($(PlatformShortName))\</OutDir>
+    <IntDir>$(SolutionDir)Build\$(Configuration) ($(PlatformShortName))\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)Build\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)Build\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)Build\$(Configuration) ($(PlatformShortName))\</OutDir>
+    <IntDir>$(SolutionDir)Build\$(Configuration) ($(PlatformShortName))\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
