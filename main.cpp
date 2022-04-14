@@ -22,8 +22,8 @@ int main(int arg, char* argv[])
 		game.display();
 
 		end_tick = SDL_GetTicks();
-		delta = (1000 / game_fps) - (end_tick - start_tick);
-		if (delta > 0 && delta < 1000 / game_fps) { SDL_Delay(delta); }
+		delta = (1000 / GAME_FPS) - (end_tick - start_tick);
+		if (delta > 0 && delta < 1000 / GAME_FPS) { SDL_Delay(delta); }
 	}
 	return 0;
 }
