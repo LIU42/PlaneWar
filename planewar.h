@@ -116,7 +116,6 @@ class Game
 	public:
 		HINSTANCE hinstance;
 		SDL_Window* window;
-		SDL_Surface* surface;
 		SDL_Rect surface_rect;
 		SDL_Rect background_rect_self;
 		SDL_Rect background_rect_dst;
@@ -127,7 +126,9 @@ class Game
 
 	public:
 		SDL_Surface* image;
+		SDL_Surface* surface;
 		SDL_Surface* background;
+		SDL_Surface* text_surface;
 		SDL_Surface* hero_bullet_img;
 		SDL_Surface* enemy1_bullet_img;
 		SDL_Surface* enemy2_bullet_img;
@@ -139,7 +140,6 @@ class Game
 	public:
 		TTF_Font* font_title;
 		TTF_Font* font_info;
-		SDL_Surface* text_surface;
 		SDL_Rect text_rect;
 		SDL_Color black;
 		SDL_Color red;

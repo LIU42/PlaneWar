@@ -418,6 +418,7 @@ void Hero::crash(vector <Enemy> &enemy, int width, int height, int num)
 		{
 			int distance_x = fabs((rect.x + HERO_WIDTH / 2) - (enemy[i].rect.x + width / 2));
 			int distance_y = fabs((rect.y + HERO_HEIGHT / 2) - (enemy[i].rect.y + height / 2));
+
 			if (distance_x <= (HERO_WIDTH + width) / 2 - CRASH_DEV && distance_y <= (HERO_HEIGHT + height) / 2 - CRASH_DEV && enemy[i].status == ALIVE_STATUS)
 			{
 				hp = 0;
@@ -535,6 +536,7 @@ void Hero_bullet::hit(vector <Enemy> &enemy, int width, int height, int num)
 	{
 		int distance_x = fabs((rect.x + HERO_BULLET_WIDTH / 2) - (enemy[i].rect.x + width / 2));
 		int distance_y = fabs((rect.y + HERO_BULLET_HEIGHT / 2) - (enemy[i].rect.y + height / 2));
+
 		if (distance_x <= width / 2 - HERO_HIT_DEV && distance_y <= height / 2 - HERO_HIT_DEV && enemy[i].hp > 0)
 		{
 			enemy[i].hp -= HERO_BULLET_DAMAGE;
