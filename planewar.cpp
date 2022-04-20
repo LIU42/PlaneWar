@@ -2,53 +2,6 @@
 
 using namespace std;
 
-Uint32 function_hero_change(Uint32 interval, void* param)
-{
-	if (game.status == PLAYING) { hero.change_appearance(); }
-	return interval;
-}
-
-Uint32 function_enemy2_change(Uint32 interval,void* param)
-{
-	if (game.status == PLAYING) { for (int i = 0; i < enemy2.size(); i++) { enemy2[i].change_appearance(); } }
-	return interval;
-}
-
-Uint32 function_hero_fire(Uint32 interval, void* param)
-{
-	if (game.status == PLAYING) { hero.fire(); }
-	return interval;
-}
-
-Uint32 function_enemy1_fire(Uint32 interval, void* param)
-{
-	if (game.status == PLAYING) { for (int i = 0; i < enemy1.size(); i++) { enemy1[i].fire(); } }
-	return interval;
-}
-
-Uint32 function_enemy2_fire(Uint32 interval, void* param)
-{
-	if (game.status == PLAYING) { for (int i = 0; i < enemy2.size(); i++) { enemy2[i].fire(); } }
-	return interval;
-}
-Uint32 function_alive(Uint32 interval, void* param)
-{
-	if (hero.status == ALIVE_STATUS && game.status == PLAYING) { game.score += ALIVE_SCORE; }
-	return interval;
-}
-
-Uint32 function_aircraft_down(Uint32 interval, void* param)
-{
-	if (game.status == PLAYING)
-	{
-		hero.down(HERO_STATUS_MAX);
-		for (int i = 0; i < enemy0.size(); i++) { enemy0[i].down(ENEMY0_STATUS_MAX); }
-		for (int i = 0; i < enemy1.size(); i++) { enemy1[i].down(ENEMY1_STATUS_MAX); }
-		for (int i = 0; i < enemy2.size(); i++) { enemy2[i].down(ENEMY2_STATUS_MAX); }
-	}
-	return interval;
-}
-
 SDL_RWops* Window::get_resource(HINSTANCE hinst, LPCWSTR name, LPCWSTR type)
 {
 	HRSRC hrsrc = FindResource(hinst, name, type);
@@ -146,6 +99,53 @@ void Window::close()
 	free_image();
 	SDL_Quit();
 	exit(0);
+}
+
+Uint32 function_hero_change(Uint32 interval, void* param)
+{
+	if (game.status == PLAYING) { hero.change_appearance(); }
+	return interval;
+}
+
+Uint32 function_enemy2_change(Uint32 interval, void* param)
+{
+	if (game.status == PLAYING) { for (int i = 0; i < enemy2.size(); i++) { enemy2[i].change_appearance(); } }
+	return interval;
+}
+
+Uint32 function_hero_fire(Uint32 interval, void* param)
+{
+	if (game.status == PLAYING) { hero.fire(); }
+	return interval;
+}
+
+Uint32 function_enemy1_fire(Uint32 interval, void* param)
+{
+	if (game.status == PLAYING) { for (int i = 0; i < enemy1.size(); i++) { enemy1[i].fire(); } }
+	return interval;
+}
+
+Uint32 function_enemy2_fire(Uint32 interval, void* param)
+{
+	if (game.status == PLAYING) { for (int i = 0; i < enemy2.size(); i++) { enemy2[i].fire(); } }
+	return interval;
+}
+Uint32 function_alive(Uint32 interval, void* param)
+{
+	if (hero.status == ALIVE_STATUS && game.status == PLAYING) { game.score += ALIVE_SCORE; }
+	return interval;
+}
+
+Uint32 function_aircraft_down(Uint32 interval, void* param)
+{
+	if (game.status == PLAYING)
+	{
+		hero.down(HERO_STATUS_MAX);
+		for (int i = 0; i < enemy0.size(); i++) { enemy0[i].down(ENEMY0_STATUS_MAX); }
+		for (int i = 0; i < enemy1.size(); i++) { enemy1[i].down(ENEMY1_STATUS_MAX); }
+		for (int i = 0; i < enemy2.size(); i++) { enemy2[i].down(ENEMY2_STATUS_MAX); }
+	}
+	return interval;
 }
 
 Game::Game() : random((unsigned)time(NULL)), randdouble(0.0, 1.0)
@@ -348,24 +348,8 @@ void Game::display()
 }
 
 void Aircraft::move(int speed) { rect.y += speed; }
-
-void Aircraft::miss(int count)
-{
-	if (rect.y > SCREEN_HEIGHT)
-	{
-		hp = 0;
-		status = count;
-	}
-}
-
-void Aircraft::down(int count)
-{
-	if (hp <= 0)
-	{
-		hp = 0;
-		if (status < count) { status += 1; }
-	}
-}
+void Aircraft::miss(int count) { if (rect.y > SCREEN_HEIGHT) { hp = 0; status = count; } }
+void Aircraft::down(int count) { if (hp <= 0) { hp = 0; if (status < count) { status += 1; } } }
 
 void Aircraft::change_appearance()
 {
