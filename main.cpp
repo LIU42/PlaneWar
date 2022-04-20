@@ -2,23 +2,38 @@
 
 using namespace std;
 
+Window window;
+Game game;
+Hero hero;
+
+vector <Enemy0> enemy0;
+vector <Enemy1> enemy1;
+vector <Enemy2> enemy2;
+
+vector <Hero_bullet> hero_bullet;
+vector <Enemy1_bullet> enemy1_bullet;
+vector <Enemy2_bullet> enemy2_bullet;
+
 int main(int arg, char* argv[])
 {
 	Uint32 start_tick;
 	Uint32 end_tick;
 	Uint32 delta;
 
-	game.load_image();
-	game.load_fonts();
+	window.init();
+	window.init_color();
+	window.load_image();
+	window.load_fonts();
+
+	game.init();
 	game.add_timer();
-	game.set_window();
 
 	while (true)
 	{
 		start_tick = SDL_GetTicks();
 
 		game.update();
-		game.events();
+		game.event();
 		game.display();
 
 		end_tick = SDL_GetTicks();

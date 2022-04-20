@@ -13,6 +13,93 @@
 
 using namespace std;
 
+class Window
+{
+	public:
+		HINSTANCE hinstance;
+		SDL_Window* window;
+		SDL_Event event;
+		SDL_PixelFormat* format;
+		const Uint8* keystatus;
+
+	public:
+		SDL_Surface* image;
+		SDL_Surface* surface;
+		SDL_Surface* background;
+		SDL_Surface* text_surface;
+		SDL_Surface* hero_bullet_img;
+		SDL_Surface* enemy1_bullet_img;
+		SDL_Surface* enemy2_bullet_img;
+		SDL_Surface* hero_img[7];
+		SDL_Surface* enemy0_img[6];
+		SDL_Surface* enemy1_img[7];
+		SDL_Surface* enemy2_img[10];
+
+	public:
+		SDL_Rect text_rect;
+		SDL_Rect surface_rect;
+		SDL_Rect background_rect_self;
+		SDL_Rect background_rect_dst;
+		SDL_Rect overflow_rect_self;
+		SDL_Rect overflow_rect_dst;
+
+	public:
+		TTF_Font* font_title;
+		TTF_Font* font_info;
+		SDL_Color black;
+		SDL_Color red;
+
+	public:
+		SDL_RWops* get_resource(HINSTANCE, LPCWSTR, LPCWSTR);
+		SDL_Surface* load_surface(DWORD);
+
+	public:
+		void text(const char*, TTF_Font*, int, int, SDL_Color);
+		void overflow_blit(SDL_Surface*, SDL_Rect);
+		void init();
+		void init_color();
+		void load_image();
+		void load_fonts();
+		void free_image();
+		void close_font();
+		void close();
+};
+
+class Game
+{
+	public:
+		int status;
+		int score;
+		int score_best;
+		int background_position;
+
+	public:
+		SDL_TimerID hero_change;
+		SDL_TimerID hero_fire;
+		SDL_TimerID enemy1_fire;
+		SDL_TimerID enemy2_change;
+		SDL_TimerID enemy2_fire;
+		SDL_TimerID aircraft_down;
+		SDL_TimerID alive;
+
+	public:
+		default_random_engine random;
+		uniform_real_distribution <double> randdouble;
+
+	public:
+		Game();
+		void init();
+		void add_timer();
+		template <class Enemy>
+		void add_enemy(vector <Enemy>&, double, int, int, int);
+		void update();
+		void event();
+		void display_background();
+		void display_plane();
+		void display_info();
+		void display();
+};
+
 class Aircraft
 {
 	public:
@@ -92,92 +179,18 @@ class Hero_bullet : public Bullet
 		void display();
 };
 
-class Enemy1_bullet : public Bullet
-{
-	public:
-		Enemy1_bullet(int, int);
-};
+class Enemy1_bullet : public Bullet { public: Enemy1_bullet(int, int); };
+class Enemy2_bullet : public Bullet { public: Enemy2_bullet(int, int); };
 
-class Enemy2_bullet : public Bullet
-{
-	public:
-		Enemy2_bullet(int, int);
-};
-
-class Game
-{
-	public:
-		int status;
-		int score;
-		int score_best;
-		int background_position;
-		const Uint8* keystatus;
-
-	public:
-		HINSTANCE hinstance;
-		SDL_Window* window;
-		SDL_Rect surface_rect;
-		SDL_Rect background_rect_self;
-		SDL_Rect background_rect_dst;
-		SDL_Rect overflow_rect_self;
-		SDL_Rect overflow_rect_dst;
-		SDL_Event event;
-		SDL_PixelFormat* format;
-
-	public:
-		SDL_Surface* image;
-		SDL_Surface* surface;
-		SDL_Surface* background;
-		SDL_Surface* text_surface;
-		SDL_Surface* hero_bullet_img;
-		SDL_Surface* enemy1_bullet_img;
-		SDL_Surface* enemy2_bullet_img;
-		SDL_Surface* hero_img[7];
-		SDL_Surface* enemy0_img[6];
-		SDL_Surface* enemy1_img[7];
-		SDL_Surface* enemy2_img[10];
-
-	public:
-		TTF_Font* font_title;
-		TTF_Font* font_info;
-		SDL_Rect text_rect;
-		SDL_Color black;
-		SDL_Color red;
-
-	public:
-		SDL_TimerID hero_change;
-		SDL_TimerID hero_fire;
-		SDL_TimerID enemy1_fire;
-		SDL_TimerID enemy2_change;
-		SDL_TimerID enemy2_fire;
-		SDL_TimerID aircraft_down;
-		SDL_TimerID alive;
-
-	public:
-		default_random_engine random;
-		uniform_real_distribution <double> randdouble;
-
-	public:
-		Hero hero;
-		vector <Enemy0> enemy0;
-		vector <Enemy1> enemy1;
-		vector <Enemy2> enemy2;
-		vector <Hero_bullet> hero_bullet;
-		vector <Enemy1_bullet> enemy1_bullet;
-		vector <Enemy2_bullet> enemy2_bullet;
-
-	public:
-		Game();
-		void init();
-		void set_window();
-		void load_image();
-		void load_fonts();
-		void add_timer();
-		void exit_game();
-		void update();
-		void events();
-		void display();
-};
-
+extern Window window;
 extern Game game;
+extern Hero hero;
+
+extern vector <Enemy0> enemy0;
+extern vector <Enemy1> enemy1;
+extern vector <Enemy2> enemy2;
+
+extern vector <Hero_bullet> hero_bullet;
+extern vector <Enemy1_bullet> enemy1_bullet;
+extern vector <Enemy2_bullet> enemy2_bullet;
 #endif

@@ -2,9 +2,54 @@
 
 using namespace std;
 
-Game game;
+Uint32 function_hero_change(Uint32 interval, void* param)
+{
+	if (game.status == PLAYING) { hero.change_appearance(); }
+	return interval;
+}
 
-SDL_RWops* get_resource(HINSTANCE hinst, LPCWSTR name, LPCWSTR type)
+Uint32 function_enemy2_change(Uint32 interval,void* param)
+{
+	if (game.status == PLAYING) { for (int i = 0; i < enemy2.size(); i++) { enemy2[i].change_appearance(); } }
+	return interval;
+}
+
+Uint32 function_hero_fire(Uint32 interval, void* param)
+{
+	if (game.status == PLAYING) { hero.fire(); }
+	return interval;
+}
+
+Uint32 function_enemy1_fire(Uint32 interval, void* param)
+{
+	if (game.status == PLAYING) { for (int i = 0; i < enemy1.size(); i++) { enemy1[i].fire(); } }
+	return interval;
+}
+
+Uint32 function_enemy2_fire(Uint32 interval, void* param)
+{
+	if (game.status == PLAYING) { for (int i = 0; i < enemy2.size(); i++) { enemy2[i].fire(); } }
+	return interval;
+}
+Uint32 function_alive(Uint32 interval, void* param)
+{
+	if (hero.status == ALIVE_STATUS && game.status == PLAYING) { game.score += ALIVE_SCORE; }
+	return interval;
+}
+
+Uint32 function_aircraft_down(Uint32 interval, void* param)
+{
+	if (game.status == PLAYING)
+	{
+		hero.down(HERO_STATUS_MAX);
+		for (int i = 0; i < enemy0.size(); i++) { enemy0[i].down(ENEMY0_STATUS_MAX); }
+		for (int i = 0; i < enemy1.size(); i++) { enemy1[i].down(ENEMY1_STATUS_MAX); }
+		for (int i = 0; i < enemy2.size(); i++) { enemy2[i].down(ENEMY2_STATUS_MAX); }
+	}
+	return interval;
+}
+
+SDL_RWops* Window::get_resource(HINSTANCE hinst, LPCWSTR name, LPCWSTR type)
 {
 	HRSRC hrsrc = FindResource(hinst, name, type);
 	DWORD size = SizeofResource(hinst, hrsrc);
@@ -12,121 +57,102 @@ SDL_RWops* get_resource(HINSTANCE hinst, LPCWSTR name, LPCWSTR type)
 	return SDL_RWFromConstMem(data, size);
 }
 
-SDL_Surface* load_surface(DWORD ID)
+SDL_Surface* Window::load_surface(DWORD ID)
 {
-	SDL_RWops* src = get_resource(game.hinstance, MAKEINTRESOURCE(ID), TEXT("PNG"));
+	SDL_RWops* src = get_resource(hinstance, MAKEINTRESOURCE(ID), TEXT("PNG"));
 	SDL_Surface* origin_image = IMG_LoadPNG_RW(src);
-	SDL_Surface* convert_image = SDL_ConvertSurface(origin_image, game.format, NULL);
+	SDL_Surface* convert_image = SDL_ConvertSurface(origin_image, format, NULL);
 	SDL_FreeSurface(origin_image);
 	SDL_FreeRW(src);
 	return convert_image;
 }
 
-Uint32 create_hero_change(Uint32 interval, void* param)
-{
-	if (game.status == PLAYING) { game.hero.change_appearance(); }
-	return interval;
-}
-
-Uint32 create_enemy2_change(Uint32 interval,void* param)
-{
-	if (game.status == PLAYING) { for (int i = 0; i < game.enemy2.size(); i++) { game.enemy2[i].change_appearance(); } }
-	return interval;
-}
-
-Uint32 create_hero_fire(Uint32 interval, void* param)
-{
-	if (game.status == PLAYING) { game.hero.fire(); }
-	return interval;
-}
-
-Uint32 create_enemy1_fire(Uint32 interval, void* param)
-{
-	if (game.status == PLAYING) { for (int i = 0; i < game.enemy1.size(); i++) { game.enemy1[i].fire(); } }
-	return interval;
-}
-
-Uint32 create_enemy2_fire(Uint32 interval, void* param)
-{
-	if (game.status == PLAYING) { for (int i = 0; i < game.enemy2.size(); i++) { game.enemy2[i].fire(); } }
-	return interval;
-}
-Uint32 create_alive(Uint32 interval, void* param)
-{
-	if (game.hero.status == ALIVE_STATUS && game.status == PLAYING) { game.score += ALIVE_SCORE; }
-	return interval;
-}
-
-Uint32 create_aircraft_down(Uint32 interval, void* param)
-{
-	if (game.status == PLAYING)
-	{
-		game.hero.down(HERO_STATUS_MAX);
-		for (int i = 0; i < game.enemy0.size(); i++) { game.enemy0[i].down(ENEMY0_STATUS_MAX); }
-		for (int i = 0; i < game.enemy1.size(); i++) { game.enemy1[i].down(ENEMY1_STATUS_MAX); }
-		for (int i = 0; i < game.enemy2.size(); i++) { game.enemy2[i].down(ENEMY2_STATUS_MAX); }
-	}
-	return interval;
-}
-
-template <class Enemy>
-void add_enemy(vector <Enemy>& enemy, double p, int width, int height, int num)
-{
-	if (game.score >= num)
-	{
-		double n = game.randdouble(game.random);
-		if (n < p)
-		{
-			int x = (int)(game.randdouble(game.random) * (SCREEN_WIDTH - width - 2 * BORDER_X) + BORDER_X);
-			enemy.push_back(Enemy(x, -height));
-		}
-	}
-}
-
-void overflow_blit(SDL_Surface* image, SDL_Rect rect)
+void Window::overflow_blit(SDL_Surface* image, SDL_Rect rect)
 {
 	SDL_Rect part = { 0,-rect.y,rect.w,rect.h };
 	SDL_Rect dst = { rect.x,0,rect.w,rect.h + rect.y };
-	SDL_BlitSurface(image, &part, game.surface, &dst);
+	SDL_BlitSurface(image, &part, surface, &dst);
 }
 
-void display_text(const char* text, TTF_Font* type, int x, int y, SDL_Color color)
+void Window::text(const char* text, TTF_Font* type, int x, int y, SDL_Color color)
 {
-	game.text_surface = TTF_RenderText_Blended(type, text, color);
-	game.text_rect = { x,y,TEXT_RECT_WIDTH,TEXT_RECT_HEIGHT };
-	SDL_BlitSurface(game.text_surface, NULL, game.surface, &game.text_rect);
-	SDL_FreeSurface(game.text_surface);
+	text_surface = TTF_RenderText_Blended(type, text, color);
+	text_rect = { x,y,TEXT_RECT_WIDTH,TEXT_RECT_HEIGHT };
+	SDL_BlitSurface(text_surface, NULL, surface, &text_rect);
+	SDL_FreeSurface(text_surface);
 }
 
-void display_background()
+void Window::init()
 {
-	if (game.status == PLAYING)
-	{
-		if (game.background_position == SCREEN_HEIGHT)
-		{
-			game.background_position = 0;
-		}
-		game.background_position += BACKGROUND_SCROLL_SPEED;
-	}
-	game.background_rect_self = { 0,0,SCREEN_WIDTH,SCREEN_HEIGHT - game.background_position };
-	game.background_rect_dst = { 0,game.background_position,SCREEN_WIDTH,SCREEN_HEIGHT - game.background_position };
-	SDL_BlitSurface(game.background, &game.background_rect_self, game.surface, &game.background_rect_dst);
+	SDL_Init(SDL_INIT_EVERYTHING);
+	hinstance = GetModuleHandle(0);
+	window = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	surface = SDL_GetWindowSurface(window);
+	format = SDL_AllocFormat(IMG_FORMAT);
+	surface_rect = { 0,0,SCREEN_WIDTH,SCREEN_HEIGHT };
+	keystatus = SDL_GetKeyboardState(NULL);
+}
 
-	game.background_rect_self = { 0,SCREEN_HEIGHT - game.background_position,SCREEN_WIDTH,game.background_position };
-	game.background_rect_dst = { 0,0,SCREEN_WIDTH,game.background_position };
-	SDL_BlitSurface(game.background, &game.background_rect_self, game.surface, &game.background_rect_dst);
+void Window::init_color()
+{
+	black = BLACK;
+	red = RED;
+}
+
+void Window::load_image()
+{
+	background = load_surface(IDB_PNG1);
+	hero_bullet_img = load_surface(IDB_PNG34);
+	enemy1_bullet_img = load_surface(IDB_PNG32);
+	enemy2_bullet_img = load_surface(IDB_PNG33);
+
+	for (int i = 0; i < HERO_IMG_MAX; i++) { hero_img[i] = load_surface(IDB_PNG25 + i); }
+	for (int i = 0; i < ENEMY0_IMG_MAX; i++) { enemy0_img[i] = load_surface(IDB_PNG2 + i); }
+	for (int i = 0; i < ENEMY1_IMG_MAX; i++) { enemy1_img[i] = load_surface(IDB_PNG8 + i); }
+	for (int i = 0; i < ENEMY2_IMG_MAX; i++) { enemy2_img[i] = load_surface(IDB_PNG15 + i); }
+}
+
+void Window::load_fonts()
+{
+	TTF_Init();
+	font_title = TTF_OpenFontRW(get_resource(hinstance, MAKEINTRESOURCE(IDR_FONT1), RT_FONT), 1, TITLE_FONT_SIZE);
+	font_info = TTF_OpenFontRW(get_resource(hinstance, MAKEINTRESOURCE(IDR_FONT1), RT_FONT), 1, INFO_FONT_SIZE);
+}
+
+void Window::free_image()
+{
+	SDL_FreeSurface(background);
+	SDL_FreeSurface(hero_bullet_img);
+	SDL_FreeSurface(enemy1_bullet_img);
+	SDL_FreeSurface(enemy2_bullet_img);
+
+	for (int i = 0; i < HERO_IMG_MAX; i++) { SDL_FreeSurface(hero_img[i]); }
+	for (int i = 0; i < ENEMY0_IMG_MAX; i++) { SDL_FreeSurface(enemy0_img[i]); }
+	for (int i = 0; i < ENEMY1_IMG_MAX; i++) { SDL_FreeSurface(enemy1_img[i]); }
+	for (int i = 0; i < ENEMY2_IMG_MAX; i++) { SDL_FreeSurface(enemy2_img[i]); }
+}
+
+void Window::close_font()
+{
+	TTF_CloseFont(font_title);
+	TTF_CloseFont(font_info);
+}
+
+void Window::close()
+{
+	SDL_DestroyWindow(window);
+	SDL_FreeFormat(format);
+	close_font();
+	free_image();
+	SDL_Quit();
+	exit(0);
 }
 
 Game::Game() : random((unsigned)time(NULL)), randdouble(0.0, 1.0)
 {
-	SDL_Init(SDL_INIT_EVERYTHING);
-	TTF_Init();
 	status = START;
-	score = 0;
 	score_best = 0;
 	background_position = 0;
-	keystatus = SDL_GetKeyboardState(NULL);
-	format = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA32);
 }
 
 void Game::init()
@@ -141,65 +167,29 @@ void Game::init()
 	enemy2_bullet.clear();
 }
 
-void Game::set_window()
-{
-	window = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-	surface = SDL_GetWindowSurface(window);
-	surface_rect = { 0,0,SCREEN_WIDTH,SCREEN_HEIGHT };
-	hinstance = GetModuleHandle(0);
-}
-
-void Game::load_image()
-{
-	background = load_surface(IDB_PNG1);
-	hero_bullet_img = load_surface(IDB_PNG34);
-	enemy1_bullet_img = load_surface(IDB_PNG32);
-	enemy2_bullet_img = load_surface(IDB_PNG33);
-
-	for (int i = 0; i < HERO_IMG_MAX; i++) { hero_img[i] = load_surface(IDB_PNG25 + i); }
-	for (int i = 0; i < ENEMY0_IMG_MAX; i++) { enemy0_img[i] = load_surface(IDB_PNG2 + i); }
-	for (int i = 0; i < ENEMY1_IMG_MAX; i++) { enemy1_img[i] = load_surface(IDB_PNG8 + i); }
-	for (int i = 0; i < ENEMY2_IMG_MAX; i++) { enemy2_img[i] = load_surface(IDB_PNG15 + i); }
-}
-
-void Game::load_fonts()
-{
-	font_title = TTF_OpenFontRW(get_resource(hinstance, MAKEINTRESOURCE(IDR_FONT1), RT_FONT), 1, TITLE_FONT_SIZE);
-	font_info = TTF_OpenFontRW(get_resource(hinstance, MAKEINTRESOURCE(IDR_FONT1), RT_FONT), 1, INFO_FONT_SIZE);
-	black = BLACK;
-	red = RED;
-}
-
 void Game::add_timer()
 {
-	hero_change = SDL_AddTimer(HERO_CHANGE_INTERVAL, create_hero_change, NULL);
-	enemy2_change = SDL_AddTimer(ENEMY2_CHANGE_INTERVAL, create_enemy2_change, NULL);
-	hero_fire = SDL_AddTimer(HERO_FIRE_INTERVAL, create_hero_fire, NULL);
-	enemy1_fire = SDL_AddTimer(ENEMY1_FIRE_INTERVAL, create_enemy1_fire, NULL);
-	enemy2_fire = SDL_AddTimer(ENEMY2_FIRE_INTERVAL, create_enemy2_fire, NULL);
-	aircraft_down = SDL_AddTimer(AIRCRAFT_DOWN_INTERVAL, create_aircraft_down, NULL);
-	alive = SDL_AddTimer(ALIVE_INTERVAL, create_alive, NULL);
+	hero_change = SDL_AddTimer(HERO_CHANGE_INTERVAL, function_hero_change, NULL);
+	enemy2_change = SDL_AddTimer(ENEMY2_CHANGE_INTERVAL, function_enemy2_change, NULL);
+	hero_fire = SDL_AddTimer(HERO_FIRE_INTERVAL, function_hero_fire, NULL);
+	enemy1_fire = SDL_AddTimer(ENEMY1_FIRE_INTERVAL, function_enemy1_fire, NULL);
+	enemy2_fire = SDL_AddTimer(ENEMY2_FIRE_INTERVAL, function_enemy2_fire, NULL);
+	aircraft_down = SDL_AddTimer(AIRCRAFT_DOWN_INTERVAL, function_aircraft_down, NULL);
+	alive = SDL_AddTimer(ALIVE_INTERVAL, function_alive, NULL);
 }
 
-void Game::exit_game()
+template <class Enemy>
+void Game::add_enemy(vector <Enemy>& enemy, double p, int width, int height, int num)
 {
-	SDL_DestroyWindow(window);
-	TTF_CloseFont(font_title);
-	TTF_CloseFont(font_info);
-	SDL_FreeFormat(format);
-
-	SDL_FreeSurface(background);
-	SDL_FreeSurface(hero_bullet_img);
-	SDL_FreeSurface(enemy1_bullet_img);
-	SDL_FreeSurface(enemy2_bullet_img);
-
-	for (int i = 0; i < HERO_IMG_MAX; i++) { SDL_FreeSurface(hero_img[i]); }
-	for (int i = 0; i < ENEMY0_IMG_MAX; i++) { SDL_FreeSurface(enemy0_img[i]); }
-	for (int i = 0; i < ENEMY1_IMG_MAX; i++) { SDL_FreeSurface(enemy1_img[i]); }
-	for (int i = 0; i < ENEMY2_IMG_MAX; i++) { SDL_FreeSurface(enemy2_img[i]); }
-
-	SDL_Quit();
-	exit(0);
+	if (score >= num)
+	{
+		double n = randdouble(random);
+		if (n < p)
+		{
+			int x = (int)(randdouble(random) * (SCREEN_WIDTH - width - 2 * BORDER_X) + BORDER_X);
+			enemy.push_back(Enemy(x, -height));
+		}
+	}
 }
 
 void Game::update()
@@ -259,14 +249,14 @@ void Game::update()
 	if (status == END) { if (score > score_best) { score_best = score; } }
 }
 
-void Game::events()
+void Game::event()
 {
 	if (status == PLAYING && hero.status == ALIVE_STATUS) { hero.move(); }
 	if (hero.status == HERO_STATUS_MAX) { status = END; }
-	while (SDL_PollEvent(&event))
+	while (SDL_PollEvent(&window.event))
 	{
-		if (event.type == SDL_QUIT) { exit_game(); }
-		if (event.type == SDL_MOUSEBUTTONDOWN)
+		if (window.event.type == SDL_QUIT) { window.close(); }
+		if (window.event.type == SDL_MOUSEBUTTONDOWN)
 		{
 			if (status == START || status == PAUSE) { status = PLAYING; }
 			else if (status == END)
@@ -275,8 +265,8 @@ void Game::events()
 				status = PLAYING;
 			}
 		}
-		if (event.key.keysym.sym == SDLK_p && status == PLAYING) { status = PAUSE; }
-		if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_b && status == PLAYING && hero.bomb_count > 0)
+		if (window.event.key.keysym.sym == SDLK_p && status == PLAYING) { status = PAUSE; }
+		if (window.event.type == SDL_KEYUP && window.event.key.keysym.sym == SDLK_b && status == PLAYING && hero.bomb_count > 0)
 		{
 			hero.release_bomb(enemy0, ENEMY0_SCORE);
 			hero.release_bomb(enemy1, ENEMY1_SCORE);
@@ -286,47 +276,75 @@ void Game::events()
 	}
 }
 
-void Game::display()
+void Game::display_background()
 {
-	char info[30];
-	display_background();
-	if (status == START)
+	if (status == PLAYING)
 	{
-		display_text("Welcome to PlaneWar", font_title, SCREEN_WIDTH / 2 - 125, (int)(SCREEN_HEIGHT * TITLE_POSITION), black);
-		display_text("Click anywhere to START...", font_info, SCREEN_WIDTH / 2 - 110, (int)(SCREEN_HEIGHT * INFO_POSITION), black);
+		if (background_position == SCREEN_HEIGHT) { background_position = 0; }
+		background_position += BACKGROUND_SCROLL_SPEED;
 	}
-	else if (status == PLAYING)
+	window.background_rect_self = { 0,0,SCREEN_WIDTH,SCREEN_HEIGHT - background_position };
+	window.background_rect_dst = { 0,background_position,SCREEN_WIDTH,SCREEN_HEIGHT - background_position };
+	SDL_BlitSurface(window.background, &window.background_rect_self, window.surface, &window.background_rect_dst);
+
+	window.background_rect_self = { 0,SCREEN_HEIGHT - background_position,SCREEN_WIDTH,background_position };
+	window.background_rect_dst = { 0,0,SCREEN_WIDTH,background_position };
+	SDL_BlitSurface(window.background, &window.background_rect_self, window.surface, &window.background_rect_dst);
+}
+
+void Game::display_plane()
+{
+	if (status == PLAYING)
 	{
 		hero.display();
 		for (int i = 0; i < enemy0.size(); i++) { enemy0[i].display(); }
 		for (int i = 0; i < enemy1.size(); i++) { enemy1[i].display(); }
 		for (int i = 0; i < enemy2.size(); i++) { enemy2[i].display(); }
 		for (int i = 0; i < hero_bullet.size(); i++) { hero_bullet[i].display(); }
-		for (int i = 0; i < enemy1_bullet.size(); i++) { enemy1_bullet[i].display(enemy1_bullet_img); }
-		for (int i = 0; i < enemy2_bullet.size(); i++) { enemy2_bullet[i].display(enemy2_bullet_img); }
+		for (int i = 0; i < enemy1_bullet.size(); i++) { enemy1_bullet[i].display(window.enemy1_bullet_img); }
+		for (int i = 0; i < enemy2_bullet.size(); i++) { enemy2_bullet[i].display(window.enemy2_bullet_img); }
+	}
+}
 
+void Game::display_info()
+{
+	char info[30];
+	if (status == START)
+	{
+		window.text("Welcome to PlaneWar", window.font_title, SCREEN_WIDTH / 2 - 125, (int)(SCREEN_HEIGHT * TITLE_POSITION), window.black);
+		window.text("Click anywhere to START...", window.font_info, SCREEN_WIDTH / 2 - 110, (int)(SCREEN_HEIGHT * INFO_POSITION), window.black);
+	}
+	else if (status == PLAYING)
+	{
 		sprintf_s(info, "score: %d", score);
-		display_text(info, font_info, BORDER_TEXT, SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE), black);
+		window.text(info, window.font_info, BORDER_TEXT, SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE), window.black);
 		sprintf_s(info, "HP: %d%%", hero.hp);
-		display_text(info, font_info, SCREEN_WIDTH - (80 + BORDER_TEXT), SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE), ((hero.hp > 30) ? black : red));
+		window.text(info, window.font_info, SCREEN_WIDTH - (80 + BORDER_TEXT), SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE), ((hero.hp > 30) ? window.black : window.red));
 		sprintf_s(info, "BOMB: %d", hero.bomb_count);
-		display_text(info, font_info, BORDER_TEXT, BORDER_TEXT, black);
+		window.text(info, window.font_info, BORDER_TEXT, BORDER_TEXT, window.black);
 	}
 	else if (status == PAUSE)
 	{
-		display_text("PAUSE", font_title, SCREEN_WIDTH / 2 - 40, (int)(SCREEN_HEIGHT * TITLE_POSITION), black);
-		display_text("Click anywhere to RESUME...", font_info, SCREEN_WIDTH / 2 - 110, (int)(SCREEN_HEIGHT * INFO_POSITION), black);
+		window.text("PAUSE", window.font_title, SCREEN_WIDTH / 2 - 40, (int)(SCREEN_HEIGHT * TITLE_POSITION), window.black);
+		window.text("Click anywhere to RESUME...", window.font_info, SCREEN_WIDTH / 2 - 110, (int)(SCREEN_HEIGHT * INFO_POSITION), window.black);
 	}
 	else if (status == END)
 	{
 		sprintf_s(info, "Your score: %d", score);
-		display_text(info, font_info, SCREEN_WIDTH / 2 - 70, (int)(SCREEN_HEIGHT * SCORE_POSITION), black);
+		window.text(info, window.font_info, SCREEN_WIDTH / 2 - 70, (int)(SCREEN_HEIGHT * SCORE_POSITION), window.black);
 		sprintf_s(info, "Best score: %d", score_best);
-		display_text(info, font_info, SCREEN_WIDTH / 2 - 70, (int)(SCREEN_HEIGHT * BEST_SCORE_POSITION), black);
-		display_text("Gameover!", font_title, SCREEN_WIDTH / 2 - 60, (int)(SCREEN_HEIGHT * TITLE_POSITION), black);
-		display_text("Click anywhere to RESTART...", font_info, SCREEN_WIDTH / 2 - 110, (int)(SCREEN_HEIGHT * INFO_POSITION), black);
+		window.text(info, window.font_info, SCREEN_WIDTH / 2 - 70, (int)(SCREEN_HEIGHT * BEST_SCORE_POSITION), window.black);
+		window.text("Gameover!", window.font_title, SCREEN_WIDTH / 2 - 60, (int)(SCREEN_HEIGHT * TITLE_POSITION), window.black);
+		window.text("Click anywhere to RESTART...", window.font_info, SCREEN_WIDTH / 2 - 110, (int)(SCREEN_HEIGHT * INFO_POSITION), window.black);
 	}
-	SDL_UpdateWindowSurface(window);
+}
+
+void Game::display()
+{
+	display_background();
+	display_plane();
+	display_info();
+	SDL_UpdateWindowSurface(window.window);
 }
 
 void Aircraft::move(int speed) { rect.y += speed; }
@@ -357,15 +375,15 @@ void Aircraft::change_appearance()
 
 void Bullet::move(int speed) { rect.y += speed; }
 void Bullet::miss() { if (rect.y > SCREEN_HEIGHT) { status = DOWN_STATUS; } }
-void Bullet::display(SDL_Surface* image) { SDL_BlitSurface(image, NULL, game.surface, &rect); }
+void Bullet::display(SDL_Surface* image) { SDL_BlitSurface(image, NULL, window.surface, &rect); }
 
 void Bullet::hit(int damage, int width, int height)
 {
-	double distance_x = fabs((rect.x + width / 2) - (game.hero.rect.x + HERO_WIDTH / 2));
-	double distance_y = fabs((rect.y + height / 2) - (game.hero.rect.y + HERO_HEIGHT / 2));
-	if (distance_x <= HERO_WIDTH / 2 - ENEMY_HIT_DEV && distance_y <= HERO_HEIGHT / 2 - ENEMY_HIT_DEV && game.hero.hp > 0)
+	double distance_x = fabs((rect.x + width / 2) - (hero.rect.x + HERO_WIDTH / 2));
+	double distance_y = fabs((rect.y + height / 2) - (hero.rect.y + HERO_HEIGHT / 2));
+	if (distance_x <= HERO_WIDTH / 2 - ENEMY_HIT_DEV && distance_y <= HERO_HEIGHT / 2 - ENEMY_HIT_DEV && hero.hp > 0)
 	{
-		game.hero.hp -= damage;
+		hero.hp -= damage;
 		status = DOWN_STATUS;
 	}
 }
@@ -382,10 +400,10 @@ void Hero::init()
 
 void Hero::move()
 {
-	if (game.keystatus[SDL_SCANCODE_W] && rect.y >= BORDER_Y) { rect.y -= HERO_SPEED; }
-	if (game.keystatus[SDL_SCANCODE_S] && rect.y <= SCREEN_HEIGHT - HERO_HEIGHT - BORDER_Y) { rect.y += HERO_SPEED; }
-	if (game.keystatus[SDL_SCANCODE_A] && rect.x >= BORDER_X) { rect.x -= HERO_SPEED; }
-	if (game.keystatus[SDL_SCANCODE_D] && rect.x <= SCREEN_WIDTH - HERO_WIDTH - BORDER_X) { rect.x += HERO_SPEED; }
+	if (window.keystatus[SDL_SCANCODE_W] && rect.y >= BORDER_Y) { rect.y -= HERO_SPEED; }
+	if (window.keystatus[SDL_SCANCODE_S] && rect.y <= SCREEN_HEIGHT - HERO_HEIGHT - BORDER_Y) { rect.y += HERO_SPEED; }
+	if (window.keystatus[SDL_SCANCODE_A] && rect.x >= BORDER_X) { rect.x -= HERO_SPEED; }
+	if (window.keystatus[SDL_SCANCODE_D] && rect.x <= SCREEN_WIDTH - HERO_WIDTH - BORDER_X) { rect.x += HERO_SPEED; }
 }
 
 void Hero::fire()
@@ -394,7 +412,7 @@ void Hero::fire()
 	{
 		int bullet_x = rect.x + HERO_WIDTH / 2 - HERO_BULLET_WIDTH / 2 + 1;
 		int bullet_y = rect.y - HERO_BULLET_HEIGHT;
-		game.hero_bullet.push_back(Hero_bullet(bullet_x, bullet_y));
+		hero_bullet.push_back(Hero_bullet(bullet_x, bullet_y));
 	}
 }
 
@@ -433,11 +451,11 @@ void Hero::display()
 {
 	if (status == ALIVE_STATUS)
 	{
-		if (appearance == APPEARANCE1) { game.image = game.hero_img[0]; }
-		else if (appearance = APPEARANCE2) { game.image = game.hero_img[1]; }
+		if (appearance == APPEARANCE1) { window.image = window.hero_img[0]; }
+		else if (appearance = APPEARANCE2) { window.image = window.hero_img[1]; }
 	}
-	else { game.image = game.hero_img[status + 1]; }
-	SDL_BlitSurface(game.image, NULL, game.surface, &rect);
+	else { window.image = window.hero_img[status + 1]; }
+	SDL_BlitSurface(window.image, NULL, window.surface, &rect);
 }
 
 Enemy0::Enemy0(int enemy_x, int enemy_y)
@@ -450,8 +468,8 @@ Enemy0::Enemy0(int enemy_x, int enemy_y)
 
 void Enemy0::display()
 {
-	if (rect.y < 0) { overflow_blit(game.enemy0_img[status], rect); }
-	else { SDL_BlitSurface(game.enemy0_img[status], NULL, game.surface, &rect); }
+	if (rect.y < 0) { window.overflow_blit(window.enemy0_img[status], rect); }
+	else { SDL_BlitSurface(window.enemy0_img[status], NULL, window.surface, &rect); }
 }
 
 Enemy1::Enemy1(int enemy_x, int enemy_y)
@@ -468,18 +486,18 @@ void Enemy1::fire()
 	{
 		int bullet_x = rect.x + ENEMY1_WIDTH / 2 - ENEMY1_BULLET_WIDTH / 2 + 1;
 		int bullet_y = rect.y + ENEMY1_HEIGHT;
-		game.enemy1_bullet.push_back(Enemy1_bullet(bullet_x, bullet_y));
+		enemy1_bullet.push_back(Enemy1_bullet(bullet_x, bullet_y));
 	}
 }
 
 void Enemy1::display()
 {
-	if (status == ALIVE_STATUS && hp > ENEMY1_HP / 2) { game.image = game.enemy1_img[0]; }
-	else if (status == ALIVE_STATUS && hp <= ENEMY1_HP / 2) { game.image = game.enemy1_img[1]; }
-	else { game.image = game.enemy1_img[status + 1]; }
+	if (status == ALIVE_STATUS && hp > ENEMY1_HP / 2) { window.image = window.enemy1_img[0]; }
+	else if (status == ALIVE_STATUS && hp <= ENEMY1_HP / 2) { window.image = window.enemy1_img[1]; }
+	else { window.image = window.enemy1_img[status + 1]; }
 
-	if (rect.y < 0) { overflow_blit(game.image, rect); }
-	else { SDL_BlitSurface(game.image, NULL, game.surface, &rect); }
+	if (rect.y < 0) { window.overflow_blit(window.image, rect); }
+	else { SDL_BlitSurface(window.image, NULL, window.surface, &rect); }
 }
 
 Enemy2::Enemy2(int enemy_x, int enemy_y)
@@ -496,7 +514,7 @@ void Enemy2::fire()
 	{
 		int bullet_x = rect.x + ENEMY2_WIDTH / 2 - ENEMY2_BULLET_WIDTH / 2 + 1;
 		int bullet_y = rect.y + ENEMY2_HEIGHT;
-		game.enemy2_bullet.push_back(Enemy2_bullet(bullet_x, bullet_y));
+		enemy2_bullet.push_back(Enemy2_bullet(bullet_x, bullet_y));
 	}
 }
 
@@ -504,14 +522,14 @@ void Enemy2::display()
 {
 	if (status == ALIVE_STATUS && hp > ENEMY2_HP / 2)
 	{
-		if (appearance == APPEARANCE1) { game.image = game.enemy2_img[0]; }
-		else if (appearance == APPEARANCE2) { game.image = game.enemy2_img[1]; }
+		if (appearance == APPEARANCE1) { window.image = window.enemy2_img[0]; }
+		else if (appearance == APPEARANCE2) { window.image = window.enemy2_img[1]; }
 	}
-	else if (status == 0 && hp <= ENEMY2_HP / 2) { game.image = game.enemy2_img[2]; }
-	else { game.image = game.enemy2_img[status + 2]; }
+	else if (status == 0 && hp <= ENEMY2_HP / 2) { window.image = window.enemy2_img[2]; }
+	else { window.image = window.enemy2_img[status + 2]; }
 
-	if (rect.y < 0) { overflow_blit(game.image, rect); }
-	else { SDL_BlitSurface(game.image, NULL, game.surface, &rect); }
+	if (rect.y < 0) { window.overflow_blit(window.image, rect); }
+	else { SDL_BlitSurface(window.image, NULL, window.surface, &rect); }
 }
 
 Hero_bullet::Hero_bullet(int bullet_x, int bullet_y)
@@ -525,8 +543,8 @@ void Hero_bullet::miss() { if (rect.y <= -HERO_BULLET_HEIGHT) { status = DOWN_ST
 
 void Hero_bullet::display()
 {
-	if (rect.y < 0) { overflow_blit(game.hero_bullet_img, rect); }
-	else { SDL_BlitSurface(game.hero_bullet_img, NULL, game.surface, &rect); }
+	if (rect.y < 0) { window.overflow_blit(window.hero_bullet_img, rect); }
+	else { SDL_BlitSurface(window.hero_bullet_img, NULL, window.surface, &rect); }
 }
 
 template <class Enemy>
