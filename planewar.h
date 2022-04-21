@@ -30,10 +30,10 @@ class Window
 		SDL_Surface* hero_bullet_img;
 		SDL_Surface* enemy1_bullet_img;
 		SDL_Surface* enemy2_bullet_img;
-		SDL_Surface* hero_img[7];
-		SDL_Surface* enemy0_img[6];
-		SDL_Surface* enemy1_img[7];
-		SDL_Surface* enemy2_img[10];
+		SDL_Surface* hero_img[HERO_IMG_MAX];
+		SDL_Surface* enemy0_img[ENEMY0_IMG_MAX];
+		SDL_Surface* enemy1_img[ENEMY1_IMG_MAX];
+		SDL_Surface* enemy2_img[ENEMY2_IMG_MAX];
 
 	public:
 		SDL_Rect text_rect;
