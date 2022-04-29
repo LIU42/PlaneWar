@@ -134,7 +134,6 @@ class Hero : public Aircraft
 		int bomb_count;
 
 	public:
-		Hero();
 		void init();
 		void move();
 		void fire();

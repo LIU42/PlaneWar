@@ -265,7 +265,7 @@ void Game::event()
 				status = PLAYING;
 			}
 		}
-		if (window.event.key.keysym.sym == SDLK_p && status == PLAYING) { status = PAUSE; }
+		if (window.event.type == SDL_KEYDOWN && window.event.key.keysym.sym == SDLK_p && status == PLAYING) { status = PAUSE; }
 		if (window.event.type == SDL_KEYUP && window.event.key.keysym.sym == SDLK_b && status == PLAYING && hero.bomb_count > 0)
 		{
 			hero.release_bomb(enemy0, ENEMY0_SCORE);
@@ -372,7 +372,6 @@ void Bullet::hit(int damage, int width, int height)
 	}
 }
 
-Hero::Hero() { init(); }
 void Hero::init()
 {
 	rect = { SCREEN_WIDTH / 2 - HERO_WIDTH / 2,SCREEN_HEIGHT - HERO_HEIGHT - 40,HERO_WIDTH,HERO_HEIGHT };
