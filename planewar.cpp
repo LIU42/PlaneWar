@@ -308,34 +308,34 @@ void Game::display_plane()
 
 void Game::display_info()
 {
-	char info[30];
+	static char info[INFO_MAX_LEN];
 	if (status == START)
 	{
-		window.text("Welcome to PlaneWar", window.font_title, SCREEN_WIDTH / 2 - 125, (int)(SCREEN_HEIGHT * TITLE_POSITION), window.black);
-		window.text("Click anywhere to START...", window.font_info, SCREEN_WIDTH / 2 - 110, (int)(SCREEN_HEIGHT * INFO_POSITION), window.black);
+		window.text("Welcome to PlaneWar", window.font_title, SCREEN_WIDTH / 2 - 125, TITLE_POSITION, window.black);
+		window.text("Click anywhere to START...", window.font_info, SCREEN_WIDTH / 2 - 110, INFO_POSITION, window.black);
 	}
 	else if (status == PLAYING)
 	{
-		sprintf_s(info, "score: %d", score);
+		SDL_snprintf(info, INFO_MAX_LEN, "score: %d", score);
 		window.text(info, window.font_info, BORDER_TEXT, SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE), window.black);
-		sprintf_s(info, "HP: %d%%", hero.hp);
+		SDL_snprintf(info, INFO_MAX_LEN, "HP: %d%%", hero.hp);
 		window.text(info, window.font_info, SCREEN_WIDTH - (80 + BORDER_TEXT), SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE), ((hero.hp > 30) ? window.black : window.red));
-		sprintf_s(info, "BOMB: %d", hero.bomb_count);
+		SDL_snprintf(info, INFO_MAX_LEN, "BOMB: %d", hero.bomb_count);
 		window.text(info, window.font_info, BORDER_TEXT, BORDER_TEXT, window.black);
 	}
 	else if (status == PAUSE)
 	{
-		window.text("PAUSE", window.font_title, SCREEN_WIDTH / 2 - 40, (int)(SCREEN_HEIGHT * TITLE_POSITION), window.black);
-		window.text("Click anywhere to RESUME...", window.font_info, SCREEN_WIDTH / 2 - 110, (int)(SCREEN_HEIGHT * INFO_POSITION), window.black);
+		window.text("PAUSE", window.font_title, SCREEN_WIDTH / 2 - 40, TITLE_POSITION, window.black);
+		window.text("Click anywhere to RESUME...", window.font_info, SCREEN_WIDTH / 2 - 110, INFO_POSITION, window.black);
 	}
 	else if (status == END)
 	{
-		sprintf_s(info, "Your score: %d", score);
-		window.text(info, window.font_info, SCREEN_WIDTH / 2 - 70, (int)(SCREEN_HEIGHT * SCORE_POSITION), window.black);
-		sprintf_s(info, "Best score: %d", score_best);
-		window.text(info, window.font_info, SCREEN_WIDTH / 2 - 70, (int)(SCREEN_HEIGHT * BEST_SCORE_POSITION), window.black);
-		window.text("Gameover!", window.font_title, SCREEN_WIDTH / 2 - 60, (int)(SCREEN_HEIGHT * TITLE_POSITION), window.black);
-		window.text("Click anywhere to RESTART...", window.font_info, SCREEN_WIDTH / 2 - 110, (int)(SCREEN_HEIGHT * INFO_POSITION), window.black);
+		SDL_snprintf(info, INFO_MAX_LEN, "Your score: %d", score);
+		window.text(info, window.font_info, SCREEN_WIDTH / 2 - 70, SCORE_POSITION, window.black);
+		SDL_snprintf(info, INFO_MAX_LEN, "Best score: %d", score_best);
+		window.text(info, window.font_info, SCREEN_WIDTH / 2 - 70, BEST_SCORE_POSITION, window.black);
+		window.text("Gameover!", window.font_title, SCREEN_WIDTH / 2 - 60, TITLE_POSITION, window.black);
+		window.text("Click anywhere to RESTART...", window.font_info, SCREEN_WIDTH / 2 - 110, INFO_POSITION, window.black);
 	}
 }
 
