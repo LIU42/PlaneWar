@@ -72,7 +72,7 @@ void Window::load_fonts()
 	font_info = TTF_OpenFontRW(get_resource(hinstance, MAKEINTRESOURCE(IDR_FONT1), RT_FONT), 1, INFO_FONT_SIZE);
 }
 
-void Window::free_image()
+void Window::delete_image()
 {
 	SDL_FreeSurface(background);
 	SDL_FreeSurface(hero_bullet_img);
@@ -85,7 +85,7 @@ void Window::free_image()
 	for (int i = 0; i < ENEMY2_IMG_MAX; i++) { SDL_FreeSurface(enemy2_img[i]); }
 }
 
-void Window::close_font()
+void Window::delete_font()
 {
 	TTF_CloseFont(font_title);
 	TTF_CloseFont(font_info);
@@ -95,8 +95,9 @@ void Window::close()
 {
 	SDL_DestroyWindow(window);
 	SDL_FreeFormat(format);
-	close_font();
-	free_image();
+	game.delete_timer();
+	delete_font();
+	delete_image();
 	SDL_Quit();
 	exit(0);
 }
@@ -148,7 +149,7 @@ Uint32 function_aircraft_down(Uint32 interval, void* param)
 	return interval;
 }
 
-Game::Game() : random((unsigned)time(NULL)), randdouble(0.0, 1.0)
+Game::Game() : random((unsigned)time(NULL)), rand_p(0.0, 1.0)
 {
 	status = START;
 	score_best = 0;
@@ -178,15 +179,26 @@ void Game::add_timer()
 	alive = SDL_AddTimer(ALIVE_INTERVAL, function_alive, NULL);
 }
 
+void Game::delete_timer()
+{
+	SDL_RemoveTimer(hero_change);
+	SDL_RemoveTimer(hero_fire);
+	SDL_RemoveTimer(enemy1_fire);
+	SDL_RemoveTimer(enemy2_change);
+	SDL_RemoveTimer(enemy2_fire);
+	SDL_RemoveTimer(aircraft_down);
+	SDL_RemoveTimer(alive);
+}
+
 template <class Enemy>
 void Game::add_enemy(vector <Enemy>& enemy, double p, int width, int height, int num)
 {
 	if (score >= num)
 	{
-		double n = randdouble(random);
+		double n = rand_p(random);
 		if (n < p)
 		{
-			int x = (int)(randdouble(random) * (SCREEN_WIDTH - width - 2 * BORDER_X) + BORDER_X);
+			int x = (int)(rand_p(random) * (SCREEN_WIDTH - width - 2 * BORDER_X) + BORDER_X);
 			enemy.push_back(Enemy(x, -height));
 		}
 	}

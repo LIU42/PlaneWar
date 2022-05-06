@@ -60,8 +60,8 @@ class Window
 		void init_color();
 		void load_image();
 		void load_fonts();
-		void free_image();
-		void close_font();
+		void delete_image();
+		void delete_font();
 		void close();
 };
 
@@ -84,12 +84,13 @@ class Game
 
 	public:
 		default_random_engine random;
-		uniform_real_distribution <double> randdouble;
+		uniform_real_distribution <double> rand_p;
 
 	public:
 		Game();
 		void init();
 		void add_timer();
+		void delete_timer();
 		template <class Enemy>
 		void add_enemy(vector <Enemy>&, double, int, int, int);
 		void update();
