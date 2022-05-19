@@ -60,8 +60,8 @@ class Window
 		void init_color();
 		void load_image();
 		void load_fonts();
-		void delete_image();
-		void delete_font();
+		void free_image();
+		void free_font();
 		void close();
 };
 
@@ -72,6 +72,7 @@ class Game
 		int score;
 		int score_best;
 		int background_position;
+		char text[INFO_MAX_LEN];
 
 	public:
 		SDL_TimerID hero_change;
@@ -90,11 +91,11 @@ class Game
 		Game();
 		void init();
 		void add_timer();
-		void delete_timer();
+		void remove_timer();
 		template <class Enemy>
 		void add_enemy(vector <Enemy>&, double, int, int, int);
 		void update();
-		void event();
+		void events();
 		void display_background();
 		void display_plane();
 		void display_info();

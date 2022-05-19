@@ -28,17 +28,18 @@ int main(int arg, char* argv[])
 	game.init();
 	game.add_timer();
 
-	while (true)
+	while (game.status != EXIT)
 	{
 		start_tick = SDL_GetTicks();
 
 		game.update();
-		game.event();
+		game.events();
 		game.display();
 
 		end_tick = SDL_GetTicks();
 		delta = (1000 / GAME_FPS) - (end_tick - start_tick);
 		if (delta >= 0 && delta <= 1000 / GAME_FPS) { SDL_Delay(delta); }
 	}
+	window.close();
 	return 0;
 }

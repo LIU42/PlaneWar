@@ -72,7 +72,7 @@ void Window::load_fonts()
 	font_info = TTF_OpenFontRW(get_resource(hinstance, MAKEINTRESOURCE(IDR_FONT1), RT_FONT), 1, INFO_FONT_SIZE);
 }
 
-void Window::delete_image()
+void Window::free_image()
 {
 	SDL_FreeSurface(background);
 	SDL_FreeSurface(hero_bullet_img);
@@ -85,7 +85,7 @@ void Window::delete_image()
 	for (int i = 0; i < ENEMY2_IMG_MAX; i++) { SDL_FreeSurface(enemy2_img[i]); }
 }
 
-void Window::delete_font()
+void Window::free_font()
 {
 	TTF_CloseFont(font_title);
 	TTF_CloseFont(font_info);
@@ -95,11 +95,10 @@ void Window::close()
 {
 	SDL_DestroyWindow(window);
 	SDL_FreeFormat(format);
-	game.delete_timer();
-	delete_font();
-	delete_image();
+	free_font();
+	free_image();
+	game.remove_timer();
 	SDL_Quit();
-	exit(0);
 }
 
 Uint32 function_hero_change(Uint32 interval, void* param)
@@ -179,7 +178,7 @@ void Game::add_timer()
 	alive = SDL_AddTimer(ALIVE_INTERVAL, function_alive, NULL);
 }
 
-void Game::delete_timer()
+void Game::remove_timer()
 {
 	SDL_RemoveTimer(hero_change);
 	SDL_RemoveTimer(hero_fire);
@@ -261,13 +260,14 @@ void Game::update()
 	if (status == END) { if (score > score_best) { score_best = score; } }
 }
 
-void Game::event()
+void Game::events()
 {
 	if (status == PLAYING && hero.status == ALIVE_STATUS) { hero.move(); }
 	if (hero.status == HERO_STATUS_MAX) { status = END; }
+
 	while (SDL_PollEvent(&window.event))
 	{
-		if (window.event.type == SDL_QUIT) { window.close(); }
+		if (window.event.type == SDL_QUIT) { game.status = EXIT; }
 		if (window.event.type == SDL_MOUSEBUTTONDOWN)
 		{
 			if (status == START || status == PAUSE) { status = PLAYING; }
@@ -320,7 +320,6 @@ void Game::display_plane()
 
 void Game::display_info()
 {
-	static char info[INFO_MAX_LEN];
 	if (status == START)
 	{
 		window.text("Welcome to PlaneWar", window.font_title, SCREEN_WIDTH / 2 - 125, TITLE_POSITION, window.black);
@@ -328,12 +327,12 @@ void Game::display_info()
 	}
 	else if (status == PLAYING)
 	{
-		SDL_snprintf(info, INFO_MAX_LEN, "score: %d", score);
-		window.text(info, window.font_info, BORDER_TEXT, SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE), window.black);
-		SDL_snprintf(info, INFO_MAX_LEN, "HP: %d%%", hero.hp);
-		window.text(info, window.font_info, SCREEN_WIDTH - (80 + BORDER_TEXT), SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE), ((hero.hp > 30) ? window.black : window.red));
-		SDL_snprintf(info, INFO_MAX_LEN, "BOMB: %d", hero.bomb_count);
-		window.text(info, window.font_info, BORDER_TEXT, BORDER_TEXT, window.black);
+		SDL_snprintf(text, INFO_MAX_LEN, "score: %d", score);
+		window.text(text, window.font_info, BORDER_TEXT, SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE), window.black);
+		SDL_snprintf(text, INFO_MAX_LEN, "HP: %d%%", hero.hp);
+		window.text(text, window.font_info, SCREEN_WIDTH - (80 + BORDER_TEXT), SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE), ((hero.hp > 30) ? window.black : window.red));
+		SDL_snprintf(text, INFO_MAX_LEN, "BOMB: %d", hero.bomb_count);
+		window.text(text, window.font_info, BORDER_TEXT, BORDER_TEXT, window.black);
 	}
 	else if (status == PAUSE)
 	{
@@ -342,10 +341,10 @@ void Game::display_info()
 	}
 	else if (status == END)
 	{
-		SDL_snprintf(info, INFO_MAX_LEN, "Your score: %d", score);
-		window.text(info, window.font_info, SCREEN_WIDTH / 2 - 70, SCORE_POSITION, window.black);
-		SDL_snprintf(info, INFO_MAX_LEN, "Best score: %d", score_best);
-		window.text(info, window.font_info, SCREEN_WIDTH / 2 - 70, BEST_SCORE_POSITION, window.black);
+		SDL_snprintf(text, INFO_MAX_LEN, "Your score: %d", score);
+		window.text(text, window.font_info, SCREEN_WIDTH / 2 - 70, SCORE_POSITION, window.black);
+		SDL_snprintf(text, INFO_MAX_LEN, "Best score: %d", score_best);
+		window.text(text, window.font_info, SCREEN_WIDTH / 2 - 70, BEST_SCORE_POSITION, window.black);
 		window.text("Gameover!", window.font_title, SCREEN_WIDTH / 2 - 60, TITLE_POSITION, window.black);
 		window.text("Click anywhere to RESTART...", window.font_info, SCREEN_WIDTH / 2 - 110, INFO_POSITION, window.black);
 	}

@@ -24,6 +24,7 @@
 #define PLAYING 1
 #define PAUSE 2
 #define END 3
+#define EXIT 4
 
 #define TITLE_POSITION 210
 #define INFO_POSITION 525
