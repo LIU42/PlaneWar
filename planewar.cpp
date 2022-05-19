@@ -22,8 +22,8 @@ SDL_Surface* Window::load_surface(DWORD ID)
 
 void Window::overflow_blit(SDL_Surface* image, SDL_Rect rect)
 {
-	SDL_Rect part = { 0,-rect.y,rect.w,rect.h };
-	SDL_Rect dst = { rect.x,0,rect.w,rect.h + rect.y };
+	SDL_Rect part = { 0, -rect.y, rect.w, rect.h };
+	SDL_Rect dst = { rect.x, 0, rect.w, rect.h + rect.y };
 	SDL_BlitSurface(image, &part, surface, &dst);
 }
 
@@ -95,9 +95,11 @@ void Window::close()
 {
 	SDL_DestroyWindow(window);
 	SDL_FreeFormat(format);
+	game.remove_timer();
 	free_font();
 	free_image();
-	game.remove_timer();
+	IMG_Quit();
+	TTF_Quit();
 	SDL_Quit();
 }
 
@@ -265,10 +267,10 @@ void Game::events()
 	if (status == PLAYING && hero.status == ALIVE_STATUS) { hero.move(); }
 	if (hero.status == HERO_STATUS_MAX) { status = END; }
 
-	while (SDL_PollEvent(&window.event))
+	while (SDL_PollEvent(&window.events))
 	{
-		if (window.event.type == SDL_QUIT) { game.status = EXIT; }
-		if (window.event.type == SDL_MOUSEBUTTONDOWN)
+		if (window.events.type == SDL_QUIT) { game.status = EXIT; }
+		if (window.events.type == SDL_MOUSEBUTTONDOWN)
 		{
 			if (status == START || status == PAUSE) { status = PLAYING; }
 			else if (status == END)
@@ -277,8 +279,8 @@ void Game::events()
 				status = PLAYING;
 			}
 		}
-		if (window.event.type == SDL_KEYDOWN && window.event.key.keysym.sym == SDLK_p && status == PLAYING) { status = PAUSE; }
-		if (window.event.type == SDL_KEYUP && window.event.key.keysym.sym == SDLK_b && status == PLAYING && hero.bomb_count > 0)
+		if (window.events.type == SDL_KEYDOWN && window.events.key.keysym.sym == SDLK_p && status == PLAYING) { status = PAUSE; }
+		if (window.events.type == SDL_KEYUP && window.events.key.keysym.sym == SDLK_b && status == PLAYING && hero.bomb_count > 0)
 		{
 			hero.release_bomb(enemy0, ENEMY0_SCORE);
 			hero.release_bomb(enemy1, ENEMY1_SCORE);
@@ -295,12 +297,12 @@ void Game::display_background()
 		if (background_position == SCREEN_HEIGHT) { background_position = 0; }
 		background_position += BACKGROUND_SCROLL_SPEED;
 	}
-	window.background_rect_self = { 0,0,SCREEN_WIDTH,SCREEN_HEIGHT - background_position };
-	window.background_rect_dst = { 0,background_position,SCREEN_WIDTH,SCREEN_HEIGHT - background_position };
+	window.background_rect_self = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - background_position };
+	window.background_rect_dst = { 0, background_position, SCREEN_WIDTH, SCREEN_HEIGHT - background_position };
 	SDL_BlitSurface(window.background, &window.background_rect_self, window.surface, &window.background_rect_dst);
 
-	window.background_rect_self = { 0,SCREEN_HEIGHT - background_position,SCREEN_WIDTH,background_position };
-	window.background_rect_dst = { 0,0,SCREEN_WIDTH,background_position };
+	window.background_rect_self = { 0, SCREEN_HEIGHT - background_position, SCREEN_WIDTH, background_position };
+	window.background_rect_dst = { 0, 0, SCREEN_WIDTH, background_position };
 	SDL_BlitSurface(window.background, &window.background_rect_self, window.surface, &window.background_rect_dst);
 }
 
@@ -385,7 +387,7 @@ void Bullet::hit(int damage, int width, int height)
 
 void Hero::init()
 {
-	rect = { SCREEN_WIDTH / 2 - HERO_WIDTH / 2,SCREEN_HEIGHT - HERO_HEIGHT - 40,HERO_WIDTH,HERO_HEIGHT };
+	rect = { SCREEN_WIDTH / 2 - HERO_WIDTH / 2, SCREEN_HEIGHT - HERO_HEIGHT - 40, HERO_WIDTH, HERO_HEIGHT };
 	hp = HERO_HP;
 	status = ALIVE_STATUS;
 	appearance = APPEARANCE1;
@@ -454,7 +456,7 @@ void Hero::display()
 
 Enemy0::Enemy0(int enemy_x, int enemy_y)
 {
-	rect = { enemy_x,enemy_y,ENEMY0_WIDTH,ENEMY0_HEIGHT };
+	rect = { enemy_x, enemy_y, ENEMY0_WIDTH, ENEMY0_HEIGHT };
 	hp = ENEMY0_HP;
 	status = ALIVE_STATUS;
 	appearance = APPEARANCE1;
@@ -468,7 +470,7 @@ void Enemy0::display()
 
 Enemy1::Enemy1(int enemy_x, int enemy_y)
 {
-	rect = { enemy_x,enemy_y,ENEMY1_WIDTH,ENEMY1_HEIGHT };
+	rect = { enemy_x, enemy_y, ENEMY1_WIDTH, ENEMY1_HEIGHT };
 	hp = ENEMY1_HP;
 	status = ALIVE_STATUS;
 	appearance = APPEARANCE1;
@@ -496,7 +498,7 @@ void Enemy1::display()
 
 Enemy2::Enemy2(int enemy_x, int enemy_y)
 {
-	rect = { enemy_x,enemy_y,ENEMY2_WIDTH,ENEMY2_HEIGHT };
+	rect = { enemy_x, enemy_y, ENEMY2_WIDTH, ENEMY2_HEIGHT };
 	hp = ENEMY2_HP;
 	appearance = APPEARANCE1;
 	status = ALIVE_STATUS;
@@ -528,7 +530,7 @@ void Enemy2::display()
 
 Hero_bullet::Hero_bullet(int bullet_x, int bullet_y)
 {
-	rect = { bullet_x,bullet_y,HERO_BULLET_WIDTH,HERO_BULLET_HEIGHT };
+	rect = { bullet_x, bullet_y, HERO_BULLET_WIDTH, HERO_BULLET_HEIGHT };
 	status = ALIVE_STATUS;
 }
 
@@ -560,12 +562,12 @@ void Hero_bullet::hit(vector <Enemy> &enemy, int width, int height, int num)
 
 Enemy1_bullet::Enemy1_bullet(int bullet_x, int bullet_y)
 {
-	rect = { bullet_x,bullet_y,ENEMY1_BULLET_WIDTH,ENEMY1_BULLET_HEIGHT };
+	rect = { bullet_x, bullet_y, ENEMY1_BULLET_WIDTH, ENEMY1_BULLET_HEIGHT };
 	status = ALIVE_STATUS;
 }
 
 Enemy2_bullet::Enemy2_bullet(int bullet_x, int bullet_y)
 {
-	rect = { bullet_x,bullet_y,ENEMY2_BULLET_WIDTH,ENEMY2_BULLET_HEIGHT };
+	rect = { bullet_x, bullet_y, ENEMY2_BULLET_WIDTH, ENEMY2_BULLET_HEIGHT };
 	status = ALIVE_STATUS;
 }

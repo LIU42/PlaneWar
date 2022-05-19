@@ -99,6 +99,6 @@
 #define APPEARANCE1 1
 #define APPEARANCE2 2
 
-#define BLACK { 0,0,0 }
-#define RED { 255,0,0 }
+#define BLACK { 0, 0, 0 }
+#define RED { 255, 0, 0 }
 #endif

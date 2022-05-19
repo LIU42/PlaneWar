@@ -18,7 +18,7 @@ class Window
 	public:
 		HINSTANCE hinstance;
 		SDL_Window* window;
-		SDL_Event event;
+		SDL_Event events;
 		SDL_PixelFormat* format;
 		const Uint8* keystatus;
 
