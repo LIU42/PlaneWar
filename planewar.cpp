@@ -269,7 +269,7 @@ void Game::events()
 
 	while (SDL_PollEvent(&window.events))
 	{
-		if (window.events.type == SDL_QUIT) { game.status = EXIT; }
+		if (window.events.type == SDL_QUIT) { status = EXIT; }
 		if (window.events.type == SDL_MOUSEBUTTONDOWN)
 		{
 			if (status == START || status == PAUSE) { status = PLAYING; }
