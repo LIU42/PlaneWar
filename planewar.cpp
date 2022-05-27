@@ -54,7 +54,7 @@ void Window::initColor()
 
 void Window::loadImage()
 {
-	background = loadSurface(IDB_PNG1);
+	backgroundImg = loadSurface(IDB_PNG1);
 	heroBulletImg = loadSurface(IDB_PNG34);
 	enemy1BulletImg = loadSurface(IDB_PNG32);
 	enemy2BulletImg = loadSurface(IDB_PNG33);
@@ -74,7 +74,7 @@ void Window::loadFonts()
 
 void Window::freeImage()
 {
-	SDL_FreeSurface(background);
+	SDL_FreeSurface(backgroundImg);
 	SDL_FreeSurface(heroBulletImg);
 	SDL_FreeSurface(enemy1BulletImg);
 	SDL_FreeSurface(enemy2BulletImg);
@@ -192,15 +192,14 @@ void Game::removeTimer()
 }
 
 template <class Enemy>
-void Game::addEnemy(vector <Enemy>& enemy, double p, int width, int height, int num)
+void Game::addEnemy(vector <Enemy>& enemy, double appendP, int width, int height, int appendScore)
 {
-	if (score >= num)
+	if (score >= appendScore)
 	{
-		double n = randP(random);
-		if (n < p)
+		if (randP(random) < appendP)
 		{
-			int x = (int)(randP(random) * (SCREEN_WIDTH - width - 2 * BORDER_X) + BORDER_X);
-			enemy.push_back(Enemy(x, -height));
+			int enemyX = (int)(randP(random) * (SCREEN_WIDTH - width - 2 * BORDER_X) + BORDER_X);
+			enemy.push_back(Enemy(enemyX, -height));
 		}
 	}
 }
@@ -299,11 +298,11 @@ void Game::displayBackground()
 	}
 	window.backgroundRectSelf = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - backgroundPosition };
 	window.backgroundRectDst = { 0, backgroundPosition, SCREEN_WIDTH, SCREEN_HEIGHT - backgroundPosition };
-	SDL_BlitSurface(window.background, &window.backgroundRectSelf, window.surface, &window.backgroundRectDst);
+	SDL_BlitSurface(window.backgroundImg, &window.backgroundRectSelf, window.surface, &window.backgroundRectDst);
 
 	window.backgroundRectSelf = { 0, SCREEN_HEIGHT - backgroundPosition, SCREEN_WIDTH, backgroundPosition };
 	window.backgroundRectDst = { 0, 0, SCREEN_WIDTH, backgroundPosition };
-	SDL_BlitSurface(window.background, &window.backgroundRectSelf, window.surface, &window.backgroundRectDst);
+	SDL_BlitSurface(window.backgroundImg, &window.backgroundRectSelf, window.surface, &window.backgroundRectDst);
 }
 
 void Game::displayPlane()

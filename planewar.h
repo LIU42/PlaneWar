@@ -25,7 +25,7 @@ class Window
 	public:
 		SDL_Surface* image;
 		SDL_Surface* surface;
-		SDL_Surface* background;
+		SDL_Surface* backgroundImg;
 		SDL_Surface* heroBulletImg;
 		SDL_Surface* enemy1BulletImg;
 		SDL_Surface* enemy2BulletImg;
