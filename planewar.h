@@ -16,52 +16,50 @@ using namespace std;
 class Window
 {
 	public:
-		HINSTANCE hinstance;
+		HINSTANCE hInstance;
 		SDL_Window* window;
 		SDL_Event events;
 		SDL_PixelFormat* format;
-		const Uint8* keystatus;
+		const Uint8* keyStatus;
 
 	public:
 		SDL_Surface* image;
 		SDL_Surface* surface;
 		SDL_Surface* background;
-		SDL_Surface* text_surface;
-		SDL_Surface* hero_bullet_img;
-		SDL_Surface* enemy1_bullet_img;
-		SDL_Surface* enemy2_bullet_img;
-		SDL_Surface* hero_img[HERO_IMG_MAX];
-		SDL_Surface* enemy0_img[ENEMY0_IMG_MAX];
-		SDL_Surface* enemy1_img[ENEMY1_IMG_MAX];
-		SDL_Surface* enemy2_img[ENEMY2_IMG_MAX];
+		SDL_Surface* heroBulletImg;
+		SDL_Surface* enemy1BulletImg;
+		SDL_Surface* enemy2BulletImg;
+		SDL_Surface* heroImg[HERO_IMG_MAX];
+		SDL_Surface* enemy0Img[ENEMY0_IMG_MAX];
+		SDL_Surface* enemy1Img[ENEMY1_IMG_MAX];
+		SDL_Surface* enemy2Img[ENEMY2_IMG_MAX];
 
 	public:
-		SDL_Rect text_rect;
-		SDL_Rect surface_rect;
-		SDL_Rect background_rect_self;
-		SDL_Rect background_rect_dst;
-		SDL_Rect overflow_rect_self;
-		SDL_Rect overflow_rect_dst;
+		SDL_Rect srceenRect;
+		SDL_Rect backgroundRectSelf;
+		SDL_Rect backgroundRectDst;
+		SDL_Rect overflowRectSelf;
+		SDL_Rect overflowRectDst;
 
 	public:
-		TTF_Font* font_title;
-		TTF_Font* font_info;
+		TTF_Font* titleFont;
+		TTF_Font* infoFont;
 		SDL_Color black;
 		SDL_Color red;
 
 	public:
-		SDL_RWops* get_resource(HINSTANCE, LPCWSTR, LPCWSTR);
-		SDL_Surface* load_surface(DWORD);
+		SDL_RWops* getResource(HINSTANCE, LPCWSTR, LPCWSTR);
+		SDL_Surface* loadSurface(DWORD);
 
 	public:
 		void text(const char*, TTF_Font*, int, int, SDL_Color);
-		void overflow_blit(SDL_Surface*, SDL_Rect);
+		void overflowBlit(SDL_Surface*, SDL_Rect);
 		void init();
-		void init_color();
-		void load_image();
-		void load_fonts();
-		void free_image();
-		void free_font();
+		void initColor();
+		void loadImage();
+		void loadFonts();
+		void freeImage();
+		void freeFont();
 		void close();
 };
 
@@ -70,35 +68,35 @@ class Game
 	public:
 		int status;
 		int score;
-		int score_best;
-		int background_position;
+		int bestScore;
+		int backgroundPosition;
 		char text[INFO_MAX_LEN];
 
 	public:
-		SDL_TimerID hero_change;
-		SDL_TimerID hero_fire;
-		SDL_TimerID enemy1_fire;
-		SDL_TimerID enemy2_change;
-		SDL_TimerID enemy2_fire;
-		SDL_TimerID aircraft_down;
+		SDL_TimerID heroChange;
+		SDL_TimerID heroFire;
+		SDL_TimerID enemy1Fire;
+		SDL_TimerID enemy2Change;
+		SDL_TimerID enemy2Fire;
+		SDL_TimerID aircraftDown;
 		SDL_TimerID alive;
 
 	public:
 		default_random_engine random;
-		uniform_real_distribution <double> rand_p;
+		uniform_real_distribution <double> randP;
 
 	public:
 		Game();
 		void init();
-		void add_timer();
-		void remove_timer();
+		void addTimer();
+		void removeTimer();
 		template <class Enemy>
-		void add_enemy(vector <Enemy>&, double, int, int, int);
+		void addEnemy(vector <Enemy>&, double, int, int, int);
 		void update();
 		void events();
-		void display_background();
-		void display_plane();
-		void display_info();
+		void displayBackground();
+		void displayPlane();
+		void displayInfo();
 		void display();
 };
 
@@ -111,7 +109,7 @@ class Aircraft
 		int appearance;
 
 	public:
-		void change_appearance();
+		void changeAppearance();
 		void move(int);
 		void down(int);
 		void miss(int);
@@ -133,14 +131,14 @@ class Bullet
 class Hero : public Aircraft
 {
 	public:
-		int bomb_count;
+		int bombCount;
 
 	public:
 		void init();
 		void move();
 		void fire();
 		template <class Enemy>
-		void release_bomb(vector <Enemy>&, int);
+		void releaseBomb(vector <Enemy>&, int);
 		template <class Enemy>
 		void crash(vector <Enemy>&, int, int, int);
 		void display();
@@ -169,10 +167,10 @@ class Enemy2 : public Aircraft
 		void display();
 };
 
-class Hero_bullet : public Bullet
+class HeroBullet : public Bullet
 {
 	public:
-		Hero_bullet(int, int);
+		HeroBullet(int, int);
 		void move();
 		void miss();
 		template <class Enemy>
@@ -180,8 +178,8 @@ class Hero_bullet : public Bullet
 		void display();
 };
 
-class Enemy1_bullet : public Bullet { public: Enemy1_bullet(int, int); };
-class Enemy2_bullet : public Bullet { public: Enemy2_bullet(int, int); };
+class Enemy1Bullet : public Bullet { public: Enemy1Bullet(int, int); };
+class Enemy2Bullet : public Bullet { public: Enemy2Bullet(int, int); };
 
 extern Window window;
 extern Game game;
@@ -191,7 +189,7 @@ extern vector <Enemy0> enemy0;
 extern vector <Enemy1> enemy1;
 extern vector <Enemy2> enemy2;
 
-extern vector <Hero_bullet> hero_bullet;
-extern vector <Enemy1_bullet> enemy1_bullet;
-extern vector <Enemy2_bullet> enemy2_bullet;
+extern vector <HeroBullet> heroBullet;
+extern vector <Enemy1Bullet> enemy1Bullet;
+extern vector <Enemy2Bullet> enemy2Bullet;
 #endif
