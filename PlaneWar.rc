@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// ÖÐÎÄ(¼òÌå£¬ÖÐ¹ú) resources
+// ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½å£¬ï¿½Ð¹ï¿½) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
 LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
@@ -52,7 +52,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON1               ICON                    "Img\\icon.ico"
+IDI_ICON1               ICON                    "Image\\icon.ico"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -60,73 +60,73 @@ IDI_ICON1               ICON                    "Img\\icon.ico"
 // PNG
 //
 
-IDB_PNG1                PNG                     "Img\\background.png"
+IDB_PNG1                PNG                     "Image\\background.png"
 
-IDB_PNG2                PNG                     "Img\\enemy0_1.png"
+IDB_PNG2                PNG                     "Image\\enemy0_1.png"
 
-IDB_PNG3                PNG                     "Img\\enemy0_2.png"
+IDB_PNG3                PNG                     "Image\\enemy0_2.png"
 
-IDB_PNG4                PNG                     "Img\\enemy0_3.png"
+IDB_PNG4                PNG                     "Image\\enemy0_3.png"
 
-IDB_PNG5                PNG                     "Img\\enemy0_4.png"
+IDB_PNG5                PNG                     "Image\\enemy0_4.png"
 
-IDB_PNG6                PNG                     "Img\\enemy0_5.png"
+IDB_PNG6                PNG                     "Image\\enemy0_5.png"
 
-IDB_PNG7                PNG                     "Img\\enemy0_6.png"
+IDB_PNG7                PNG                     "Image\\enemy0_6.png"
 
-IDB_PNG8                PNG                     "Img\\enemy1_1.png"
+IDB_PNG8                PNG                     "Image\\enemy1_1.png"
 
-IDB_PNG9                PNG                     "Img\\enemy1_2.png"
+IDB_PNG9                PNG                     "Image\\enemy1_2.png"
 
-IDB_PNG10               PNG                     "Img\\enemy1_3.png"
+IDB_PNG10               PNG                     "Image\\enemy1_3.png"
 
-IDB_PNG11               PNG                     "Img\\enemy1_4.png"
+IDB_PNG11               PNG                     "Image\\enemy1_4.png"
 
-IDB_PNG12               PNG                     "Img\\enemy1_5.png"
+IDB_PNG12               PNG                     "Image\\enemy1_5.png"
 
-IDB_PNG13               PNG                     "Img\\enemy1_6.png"
+IDB_PNG13               PNG                     "Image\\enemy1_6.png"
 
-IDB_PNG14               PNG                     "Img\\enemy1_7.png"
+IDB_PNG14               PNG                     "Image\\enemy1_7.png"
 
-IDB_PNG15               PNG                     "Img\\enemy2_1.png"
+IDB_PNG15               PNG                     "Image\\enemy2_1.png"
 
-IDB_PNG16               PNG                     "Img\\enemy2_2.png"
+IDB_PNG16               PNG                     "Image\\enemy2_2.png"
 
-IDB_PNG17               PNG                     "Img\\enemy2_3.png"
+IDB_PNG17               PNG                     "Image\\enemy2_3.png"
 
-IDB_PNG18               PNG                     "Img\\enemy2_4.png"
+IDB_PNG18               PNG                     "Image\\enemy2_4.png"
 
-IDB_PNG19               PNG                     "Img\\enemy2_5.png"
+IDB_PNG19               PNG                     "Image\\enemy2_5.png"
 
-IDB_PNG20               PNG                     "Img\\enemy2_6.png"
+IDB_PNG20               PNG                     "Image\\enemy2_6.png"
 
-IDB_PNG21               PNG                     "Img\\enemy2_7.png"
+IDB_PNG21               PNG                     "Image\\enemy2_7.png"
 
-IDB_PNG22               PNG                     "Img\\enemy2_8.png"
+IDB_PNG22               PNG                     "Image\\enemy2_8.png"
 
-IDB_PNG23               PNG                     "Img\\enemy2_9.png"
+IDB_PNG23               PNG                     "Image\\enemy2_9.png"
 
-IDB_PNG24               PNG                     "Img\\enemy2_10.png"
+IDB_PNG24               PNG                     "Image\\enemy2_10.png"
 
-IDB_PNG25               PNG                     "Img\\hero1.png"
+IDB_PNG25               PNG                     "Image\\hero1.png"
 
-IDB_PNG26               PNG                     "Img\\hero2.png"
+IDB_PNG26               PNG                     "Image\\hero2.png"
 
-IDB_PNG27               PNG                     "Img\\hero3.png"
+IDB_PNG27               PNG                     "Image\\hero3.png"
 
-IDB_PNG28               PNG                     "Img\\hero4.png"
+IDB_PNG28               PNG                     "Image\\hero4.png"
 
-IDB_PNG29               PNG                     "Img\\hero5.png"
+IDB_PNG29               PNG                     "Image\\hero5.png"
 
-IDB_PNG30               PNG                     "Img\\hero6.png"
+IDB_PNG30               PNG                     "Image\\hero6.png"
 
-IDB_PNG31               PNG                     "Img\\hero7.png"
+IDB_PNG31               PNG                     "Image\\hero7.png"
 
-IDB_PNG32               PNG                     "Img\\enemy1_bullet.png"
+IDB_PNG32               PNG                     "Image\\enemy1_bullet.png"
 
-IDB_PNG33               PNG                     "Img\\enemy2_bullet.png"
+IDB_PNG33               PNG                     "Image\\enemy2_bullet.png"
 
-IDB_PNG34               PNG                     "Img\\hero_bullet.png"
+IDB_PNG34               PNG                     "Image\\hero_bullet.png"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -136,7 +136,7 @@ IDB_PNG34               PNG                     "Img\\hero_bullet.png"
 
 IDR_FONT1               FONT                    "Fonts\\consola.ttf"
 
-#endif    // ÖÐÎÄ(¼òÌå£¬ÖÐ¹ú) resources
+#endif    // ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½å£¬ï¿½Ð¹ï¿½) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
