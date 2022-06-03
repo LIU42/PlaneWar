@@ -360,8 +360,8 @@ void Game::display()
 }
 
 void Aircraft::move(int speed) { rect.y += speed; }
-void Aircraft::miss(int count) { if (rect.y > SCREEN_HEIGHT) { hp = 0; status = count; } }
-void Aircraft::down(int count) { if (hp <= 0) { hp = 0; if (status < count) { status += 1; } } }
+void Aircraft::miss(int statusCount) { if (rect.y > SCREEN_HEIGHT) { hp = 0; status = statusCount; } }
+void Aircraft::down(int statusCount) { if (hp <= 0) { hp = 0; if (status < statusCount) { status += 1; } } }
 
 void Aircraft::changeAppearance()
 {
@@ -444,13 +444,16 @@ void Hero::crash(vector <Enemy> &enemy, int width, int height, int score)
 
 void Hero::display()
 {
-	if (status == ALIVE_STATUS)
+	if (status < HERO_STATUS_MAX)
 	{
-		if (appearance == APPEARANCE1) { window.image = window.heroImg[0]; }
-		else if (appearance = APPEARANCE2) { window.image = window.heroImg[1]; }
+		if (status == ALIVE_STATUS)
+		{
+			if (appearance == APPEARANCE1) { window.image = window.heroImg[0]; }
+			else if (appearance = APPEARANCE2) { window.image = window.heroImg[1]; }
+		}
+		else { window.image = window.heroImg[status + 1]; }
+		SDL_BlitSurface(window.image, NULL, window.surface, &rect);
 	}
-	else { window.image = window.heroImg[status + 1]; }
-	SDL_BlitSurface(window.image, NULL, window.surface, &rect);
 }
 
 Enemy0::Enemy0(int enemyX, int enemyY)
@@ -463,8 +466,11 @@ Enemy0::Enemy0(int enemyX, int enemyY)
 
 void Enemy0::display()
 {
-	if (rect.y < 0) { window.overflowBlit(window.enemy0Img[status], rect); }
-	else { SDL_BlitSurface(window.enemy0Img[status], NULL, window.surface, &rect); }
+	if (status < ENEMY0_STATUS_MAX)
+	{
+		if (rect.y < 0) { window.overflowBlit(window.enemy0Img[status], rect); }
+		else { SDL_BlitSurface(window.enemy0Img[status], NULL, window.surface, &rect); }
+	}
 }
 
 Enemy1::Enemy1(int enemyX, int enemyY)
@@ -487,12 +493,15 @@ void Enemy1::fire()
 
 void Enemy1::display()
 {
-	if (status == ALIVE_STATUS && hp > ENEMY1_HP / 2) { window.image = window.enemy1Img[0]; }
-	else if (status == ALIVE_STATUS && hp <= ENEMY1_HP / 2) { window.image = window.enemy1Img[1]; }
-	else { window.image = window.enemy1Img[status + 1]; }
+	if (status < ENEMY1_STATUS_MAX)
+	{
+		if (status == ALIVE_STATUS && hp > ENEMY1_HP / 2) { window.image = window.enemy1Img[0]; }
+		else if (status == ALIVE_STATUS && hp <= ENEMY1_HP / 2) { window.image = window.enemy1Img[1]; }
+		else { window.image = window.enemy1Img[status + 1]; }
 
-	if (rect.y < 0) { window.overflowBlit(window.image, rect); }
-	else { SDL_BlitSurface(window.image, NULL, window.surface, &rect); }
+		if (rect.y < 0) { window.overflowBlit(window.image, rect); }
+		else { SDL_BlitSurface(window.image, NULL, window.surface, &rect); }
+	}
 }
 
 Enemy2::Enemy2(int enemyX, int enemyY)
@@ -515,16 +524,19 @@ void Enemy2::fire()
 
 void Enemy2::display()
 {
-	if (status == ALIVE_STATUS && hp > ENEMY2_HP / 2)
+	if (status < ENEMY2_STATUS_MAX)
 	{
-		if (appearance == APPEARANCE1) { window.image = window.enemy2Img[0]; }
-		else if (appearance == APPEARANCE2) { window.image = window.enemy2Img[1]; }
-	}
-	else if (status == 0 && hp <= ENEMY2_HP / 2) { window.image = window.enemy2Img[2]; }
-	else { window.image = window.enemy2Img[status + 2]; }
+		if (status == ALIVE_STATUS && hp > ENEMY2_HP / 2)
+		{
+			if (appearance == APPEARANCE1) { window.image = window.enemy2Img[0]; }
+			else if (appearance == APPEARANCE2) { window.image = window.enemy2Img[1]; }
+		}
+		else if (status == 0 && hp <= ENEMY2_HP / 2) { window.image = window.enemy2Img[2]; }
+		else { window.image = window.enemy2Img[status + 2]; }
 
-	if (rect.y < 0) { window.overflowBlit(window.image, rect); }
-	else { SDL_BlitSurface(window.image, NULL, window.surface, &rect); }
+		if (rect.y < 0) { window.overflowBlit(window.image, rect); }
+		else { SDL_BlitSurface(window.image, NULL, window.surface, &rect); }
+	}
 }
 
 HeroBullet::HeroBullet(int bulletX, int bulletY)

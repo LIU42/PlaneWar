@@ -60,9 +60,6 @@
     <Image Include="Img\enemy0_5.png">
       <Filter>资源文件</Filter>
     </Image>
-    <Image Include="Img\enemy0_6.png">
-      <Filter>资源文件</Filter>
-    </Image>
     <Image Include="Img\enemy1_1.png">
       <Filter>资源文件</Filter>
     </Image>
@@ -79,9 +76,6 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="Img\enemy1_6.png">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="Img\enemy1_7.png">
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="Img\enemy2_1.png">
@@ -111,9 +105,6 @@
     <Image Include="Img\enemy2_9.png">
       <Filter>资源文件</Filter>
     </Image>
-    <Image Include="Img\enemy2_10.png">
-      <Filter>资源文件</Filter>
-    </Image>
     <Image Include="Img\hero1.png">
       <Filter>资源文件</Filter>
     </Image>
@@ -130,9 +121,6 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="Img\hero6.png">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="Img\hero7.png">
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="Img\enemy1_bullet.png">

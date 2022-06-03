@@ -72,8 +72,6 @@ IDB_PNG5                PNG                     "Images\\enemy0_4.png"
 
 IDB_PNG6                PNG                     "Images\\enemy0_5.png"
 
-IDB_PNG7                PNG                     "Images\\enemy0_6.png"
-
 IDB_PNG8                PNG                     "Images\\enemy1_1.png"
 
 IDB_PNG9                PNG                     "Images\\enemy1_2.png"
@@ -85,8 +83,6 @@ IDB_PNG11               PNG                     "Images\\enemy1_4.png"
 IDB_PNG12               PNG                     "Images\\enemy1_5.png"
 
 IDB_PNG13               PNG                     "Images\\enemy1_6.png"
-
-IDB_PNG14               PNG                     "Images\\enemy1_7.png"
 
 IDB_PNG15               PNG                     "Images\\enemy2_1.png"
 
@@ -106,8 +102,6 @@ IDB_PNG22               PNG                     "Images\\enemy2_8.png"
 
 IDB_PNG23               PNG                     "Images\\enemy2_9.png"
 
-IDB_PNG24               PNG                     "Images\\enemy2_10.png"
-
 IDB_PNG25               PNG                     "Images\\hero1.png"
 
 IDB_PNG26               PNG                     "Images\\hero2.png"
@@ -119,8 +113,6 @@ IDB_PNG28               PNG                     "Images\\hero4.png"
 IDB_PNG29               PNG                     "Images\\hero5.png"
 
 IDB_PNG30               PNG                     "Images\\hero6.png"
-
-IDB_PNG31               PNG                     "Images\\hero7.png"
 
 IDB_PNG32               PNG                     "Images\\enemy1_bullet.png"
 

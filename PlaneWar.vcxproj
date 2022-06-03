@@ -185,17 +185,14 @@
     <Image Include="Img\enemy0_3.png" />
     <Image Include="Img\enemy0_4.png" />
     <Image Include="Img\enemy0_5.png" />
-    <Image Include="Img\enemy0_6.png" />
     <Image Include="Img\enemy1_1.png" />
     <Image Include="Img\enemy1_2.png" />
     <Image Include="Img\enemy1_3.png" />
     <Image Include="Img\enemy1_4.png" />
     <Image Include="Img\enemy1_5.png" />
     <Image Include="Img\enemy1_6.png" />
-    <Image Include="Img\enemy1_7.png" />
     <Image Include="Img\enemy1_bullet.png" />
     <Image Include="Img\enemy2_1.png" />
-    <Image Include="Img\enemy2_10.png" />
     <Image Include="Img\enemy2_2.png" />
     <Image Include="Img\enemy2_3.png" />
     <Image Include="Img\enemy2_4.png" />
@@ -211,7 +208,6 @@
     <Image Include="Img\hero4.png" />
     <Image Include="Img\hero5.png" />
     <Image Include="Img\hero6.png" />
-    <Image Include="Img\hero7.png" />
     <Image Include="Img\hero_bullet.png" />
     <Image Include="Img\icon.ico" />
   </ItemGroup>
