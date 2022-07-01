@@ -18,7 +18,7 @@ int main(int arg, char* argv[])
 {
 	Uint32 startTick;
 	Uint32 endTick;
-	Uint32 delta;
+	INT32 delayTick;
 
 	window.init();
 	window.initColor();
@@ -37,8 +37,9 @@ int main(int arg, char* argv[])
 		game.display();
 
 		endTick = SDL_GetTicks();
-		delta = (1000 / GAME_FPS) - (endTick - startTick);
-		if (delta >= 0 && delta <= 1000 / GAME_FPS) { SDL_Delay(delta); }
+		delayTick = (1000 / GAME_FPS) - (endTick - startTick);
+
+		SDL_Delay((delayTick > 0) ? delayTick : 0);
 	}
 	window.close();
 	return 0;
