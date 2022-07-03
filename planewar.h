@@ -20,10 +20,11 @@ class Window
 		SDL_Window* window;
 		SDL_Event events;
 		SDL_PixelFormat* format;
+		SDL_Rect srceenRect;
 		const Uint8* keyStatus;
 
 	public:
-		SDL_Surface* image;
+		SDL_Surface* temp;
 		SDL_Surface* surface;
 		SDL_Surface* backgroundImg;
 		SDL_Surface* heroBulletImg;
@@ -33,13 +34,6 @@ class Window
 		SDL_Surface* enemy0Img[ENEMY0_IMG_MAX];
 		SDL_Surface* enemy1Img[ENEMY1_IMG_MAX];
 		SDL_Surface* enemy2Img[ENEMY2_IMG_MAX];
-
-	public:
-		SDL_Rect srceenRect;
-		SDL_Rect backgroundRectSelf;
-		SDL_Rect backgroundRectDst;
-		SDL_Rect overflowRectSelf;
-		SDL_Rect overflowRectDst;
 
 	public:
 		TTF_Font* titleFont;
@@ -69,8 +63,7 @@ class Game
 		int status;
 		int score;
 		int bestScore;
-		int backgroundPosition;
-		char text[INFO_MAX_LEN];
+		int backgroundY;
 
 	public:
 		SDL_TimerID heroChange;
@@ -86,12 +79,15 @@ class Game
 		uniform_real_distribution <double> randP;
 
 	public:
+		template <class Enemy> void addEnemy(vector <Enemy>&, double, int, int, int);
+		template <class Enemy> void updateEnemy(vector <Enemy>&, int, int);
+		template <class Bullet> void updateBullet(vector <Bullet>&, int, int, int, int);
+
+	public:
 		Game();
 		void init();
 		void addTimer();
 		void removeTimer();
-		template <class Enemy>
-		void addEnemy(vector <Enemy>&, double, int, int, int);
 		void update();
 		void events();
 		void displayBackground();
@@ -104,7 +100,7 @@ class Aircraft
 {
 	public:
 		SDL_Rect rect;
-		int hp;
+		int health;
 		int status;
 		int appearance;
 
@@ -134,13 +130,13 @@ class Hero : public Aircraft
 		int bombCount;
 
 	public:
+		template <class Enemy> void releaseBomb(vector <Enemy>&, int);
+		template <class Enemy> void crash(vector <Enemy>&, int, int, int);
+
+	public:
 		void init();
 		void move();
 		void fire();
-		template <class Enemy>
-		void releaseBomb(vector <Enemy>&, int);
-		template <class Enemy>
-		void crash(vector <Enemy>&, int, int, int);
 		void display();
 };
 
@@ -170,11 +166,12 @@ class Enemy2 : public Aircraft
 class HeroBullet : public Bullet
 {
 	public:
+		template <class Enemy> void hit(vector <Enemy>&, int, int, int);
+
+	public:
 		HeroBullet(int, int);
 		void move();
 		void miss();
-		template <class Enemy>
-		void hit(vector <Enemy>&, int, int, int);
 		void display();
 };
 

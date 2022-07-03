@@ -111,7 +111,7 @@ Uint32 heroChangeFunction(Uint32 interval, void* param)
 
 Uint32 enemy2ChangeFunction(Uint32 interval, void* param)
 {
-	if (game.status == PLAYING) { for (int i = 0; i < enemy2.size(); i++) { enemy2[i].changeAppearance(); } }
+	for (int i = 0; i < enemy2.size() && game.status == PLAYING; i++) { enemy2[i].changeAppearance(); }
 	return interval;
 }
 
@@ -123,18 +123,18 @@ Uint32 heroFireFunction(Uint32 interval, void* param)
 
 Uint32 enemy1FireFunction(Uint32 interval, void* param)
 {
-	if (game.status == PLAYING) { for (int i = 0; i < enemy1.size(); i++) { enemy1[i].fire(); } }
+	for (int i = 0; i < enemy1.size() && game.status == PLAYING; i++) { enemy1[i].fire(); }
 	return interval;
 }
 
 Uint32 enemy2FireFunction(Uint32 interval, void* param)
 {
-	if (game.status == PLAYING) { for (int i = 0; i < enemy2.size(); i++) { enemy2[i].fire(); } }
+	for (int i = 0; i < enemy2.size() && game.status == PLAYING; i++) { enemy2[i].fire(); }
 	return interval;
 }
 Uint32 aliveFunction(Uint32 interval, void* param)
 {
-	if (hero.status == ALIVE_STATUS && game.status == PLAYING) { game.score += ALIVE_SCORE; }
+	game.score += (hero.status == ALIVE_STATUS && game.status == PLAYING) ? ALIVE_SCORE : 0;
 	return interval;
 }
 
@@ -154,7 +154,7 @@ Game::Game() : random((unsigned)time(NULL)), randP(0.0, 1.0)
 {
 	status = START;
 	bestScore = 0;
-	backgroundPosition = 0;
+	backgroundY = 0;
 }
 
 void Game::init()
@@ -191,8 +191,7 @@ void Game::removeTimer()
 	SDL_RemoveTimer(alive);
 }
 
-template <class Enemy>
-void Game::addEnemy(vector <Enemy>& enemy, double appendP, int width, int height, int appendScore)
+template <class Enemy> void Game::addEnemy(vector <Enemy>& enemy, double appendP, int width, int height, int appendScore)
 {
 	if (score >= appendScore)
 	{
@@ -201,6 +200,27 @@ void Game::addEnemy(vector <Enemy>& enemy, double appendP, int width, int height
 			int enemyX = (int)(randP(random) * (SCREEN_WIDTH - width - 2 * BORDER_X) + BORDER_X);
 			enemy.push_back(Enemy(enemyX, -height));
 		}
+	}
+}
+
+template <class Enemy> void Game::updateEnemy(vector <Enemy>& enemy, int speed, int statusMax)
+{
+	for (int i = 0; i < enemy.size(); i++)
+	{
+		enemy[i].move(speed);
+		enemy[i].miss(statusMax);
+		if (enemy[i].status == statusMax) { enemy.erase(enemy.begin() + i--); }
+	}
+}
+
+template <class Bullet> void Game::updateBullet(vector <Bullet>& bullet, int speed, int damage, int width, int height)
+{
+	for (int i = 0; i < bullet.size(); i++)
+	{
+		bullet[i].move(speed);
+		bullet[i].miss();
+		bullet[i].hit(damage, width, height);
+		if (bullet[i].status == DOWN_STATUS) { bullet.erase(bullet.begin() + i--); }
 	}
 }
 
@@ -216,24 +236,13 @@ void Game::update()
 		hero.crash(enemy1, ENEMY1_WIDTH, ENEMY1_HEIGHT, ENEMY1_SCORE);
 		hero.crash(enemy2, ENEMY2_WIDTH, ENEMY2_HEIGHT, ENEMY2_SCORE);
 
-		for (int i = 0; i < enemy0.size(); i++)
-		{
-			enemy0[i].move(ENEMY0_SPEED);
-			enemy0[i].miss(ENEMY0_STATUS_MAX);
-			if (enemy0[i].status == ENEMY0_STATUS_MAX) { enemy0.erase(enemy0.begin() + i--); }
-		}
-		for (int i = 0; i < enemy1.size(); i++)
-		{
-			enemy1[i].move(ENEMY1_SPEED);
-			enemy1[i].miss(ENEMY1_STATUS_MAX);
-			if (enemy1[i].status == ENEMY1_STATUS_MAX) { enemy1.erase(enemy1.begin() + i--); }
-		}
-		for (int i = 0; i < enemy2.size(); i++)
-		{
-			enemy2[i].move(ENEMY2_SPEED);
-			enemy2[i].miss(ENEMY2_STATUS_MAX);
-			if (enemy2[i].status == ENEMY2_STATUS_MAX) { enemy2.erase(enemy2.begin() + i--); }
-		}
+		updateEnemy(enemy0, ENEMY0_SPEED, ENEMY0_STATUS_MAX);
+		updateEnemy(enemy1, ENEMY1_SPEED, ENEMY1_STATUS_MAX);
+		updateEnemy(enemy2, ENEMY2_SPEED, ENEMY2_STATUS_MAX);
+
+		updateBullet(enemy1Bullet, ENEMY1_BULLET_SPEED, ENEMY1_BULLET_DAMAGE, ENEMY1_BULLET_WIDTH, ENEMY1_BULLET_HEIGHT);
+		updateBullet(enemy2Bullet, ENEMY2_BULLET_SPEED, ENEMY2_BULLET_DAMAGE, ENEMY2_BULLET_WIDTH, ENEMY2_BULLET_HEIGHT);
+
 		for (int i = 0; i < heroBullet.size(); i++)
 		{
 			heroBullet[i].move();
@@ -243,22 +252,8 @@ void Game::update()
 			heroBullet[i].hit(enemy2, ENEMY2_WIDTH, ENEMY2_HEIGHT, ENEMY2_SCORE);
 			if (heroBullet[i].status == DOWN_STATUS) { heroBullet.erase(heroBullet.begin() + i--); }
 		}
-		for (int i = 0; i < enemy1Bullet.size(); i++)
-		{
-			enemy1Bullet[i].move(ENEMY1_BULLET_SPEED);
-			enemy1Bullet[i].miss();
-			enemy1Bullet[i].hit(ENEMY1_BULLET_DAMAGE, ENEMY1_BULLET_WIDTH, ENEMY1_BULLET_HEIGHT);
-			if (enemy1Bullet[i].status == DOWN_STATUS) { enemy1Bullet.erase(enemy1Bullet.begin() + i--); }
-		}
-		for (int i = 0; i < enemy2Bullet.size(); i++)
-		{
-			enemy2Bullet[i].move(ENEMY2_BULLET_SPEED);
-			enemy2Bullet[i].miss();
-			enemy2Bullet[i].hit(ENEMY2_BULLET_DAMAGE, ENEMY2_BULLET_WIDTH, ENEMY2_BULLET_HEIGHT);
-			if (enemy2Bullet[i].status == DOWN_STATUS) { enemy2Bullet.erase(enemy2Bullet.begin() + i--); }
-		}
 	}
-	if (status == END) { if (score > bestScore) { bestScore = score; } }
+	if (status == END && score > bestScore) { bestScore = score; }
 }
 
 void Game::events()
@@ -291,18 +286,21 @@ void Game::events()
 
 void Game::displayBackground()
 {
+	static SDL_Rect selfRect;
+	static SDL_Rect dstRect;
+
 	if (status == PLAYING)
 	{
-		if (backgroundPosition == SCREEN_HEIGHT) { backgroundPosition = 0; }
-		backgroundPosition += BACKGROUND_SCROLL_SPEED;
+		if (backgroundY == SCREEN_HEIGHT) { backgroundY = 0; }
+		backgroundY += BACKGROUND_SCROLL_SPEED;
 	}
-	window.backgroundRectSelf = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - backgroundPosition };
-	window.backgroundRectDst = { 0, backgroundPosition, SCREEN_WIDTH, SCREEN_HEIGHT - backgroundPosition };
-	SDL_BlitSurface(window.backgroundImg, &window.backgroundRectSelf, window.surface, &window.backgroundRectDst);
+	selfRect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - backgroundY };
+	dstRect = { 0, backgroundY, SCREEN_WIDTH, SCREEN_HEIGHT - backgroundY };
+	SDL_BlitSurface(window.backgroundImg, &selfRect, window.surface, &dstRect);
 
-	window.backgroundRectSelf = { 0, SCREEN_HEIGHT - backgroundPosition, SCREEN_WIDTH, backgroundPosition };
-	window.backgroundRectDst = { 0, 0, SCREEN_WIDTH, backgroundPosition };
-	SDL_BlitSurface(window.backgroundImg, &window.backgroundRectSelf, window.surface, &window.backgroundRectDst);
+	selfRect = { 0, SCREEN_HEIGHT - backgroundY, SCREEN_WIDTH, backgroundY };
+	dstRect = { 0, 0, SCREEN_WIDTH, backgroundY };
+	SDL_BlitSurface(window.backgroundImg, &selfRect, window.surface, &dstRect);
 }
 
 void Game::displayPlane()
@@ -321,6 +319,8 @@ void Game::displayPlane()
 
 void Game::displayInfo()
 {
+	static char text[INFO_MAX_LEN];
+
 	if (status == START)
 	{
 		window.text("Welcome to PlaneWar", window.titleFont, SCREEN_WIDTH / 2 - 125, TITLE_POSITION, window.black);
@@ -330,8 +330,8 @@ void Game::displayInfo()
 	{
 		SDL_snprintf(text, INFO_MAX_LEN, "score: %d", score);
 		window.text(text, window.infoFont, BORDER_TEXT, SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE), window.black);
-		SDL_snprintf(text, INFO_MAX_LEN, "HP: %d%%", hero.hp);
-		window.text(text, window.infoFont, SCREEN_WIDTH - (80 + BORDER_TEXT), SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE), ((hero.hp > 30) ? window.black : window.red));
+		SDL_snprintf(text, INFO_MAX_LEN, "HP: %d%%", hero.health);
+		window.text(text, window.infoFont, SCREEN_WIDTH - (80 + BORDER_TEXT), SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE), ((hero.health > 30) ? window.black : window.red));
 		SDL_snprintf(text, INFO_MAX_LEN, "BOMB: %d", hero.bombCount);
 		window.text(text, window.infoFont, BORDER_TEXT, BORDER_TEXT, window.black);
 	}
@@ -360,26 +360,48 @@ void Game::display()
 }
 
 void Aircraft::move(int speed) { rect.y += speed; }
-void Aircraft::miss(int statusCount) { if (rect.y > SCREEN_HEIGHT) { hp = 0; status = statusCount; } }
-void Aircraft::down(int statusCount) { if (hp <= 0) { hp = 0; if (status < statusCount) { status += 1; } } }
+
+void Aircraft::miss(int statusCode)
+{
+	if (rect.y > SCREEN_HEIGHT)
+	{
+		health = 0;
+		status = statusCode;
+	}
+}
+
+void Aircraft::down(int statusCode)
+{
+	if (health <= 0)
+	{
+		health = 0;
+		status += (status < statusCode) ? 1 : 0;
+	}
+}
 
 void Aircraft::changeAppearance()
 {
-	if (appearance == APPEARANCE1) { appearance = APPEARANCE2; }
-	else { appearance = APPEARANCE1; }
+	switch (appearance)
+	{
+		case APPEARANCE1: appearance = APPEARANCE2; break;
+		case APPEARANCE2: appearance = APPEARANCE1; break;
+	}
 }
 
 void Bullet::move(int speed) { rect.y += speed; }
-void Bullet::miss() { if (rect.y > SCREEN_HEIGHT) { status = DOWN_STATUS; } }
+
+void Bullet::miss() { status = (rect.y > SCREEN_HEIGHT) ? DOWN_STATUS : ALIVE_STATUS; }
+
 void Bullet::display(SDL_Surface* image) { SDL_BlitSurface(image, NULL, window.surface, &rect); }
 
 void Bullet::hit(int damage, int width, int height)
 {
 	int distanceX = SDL_abs((rect.x + width / 2) - (hero.rect.x + HERO_WIDTH / 2));
 	int distanceY = SDL_abs((rect.y + height / 2) - (hero.rect.y + HERO_HEIGHT / 2));
-	if (distanceX <= HERO_WIDTH / 2 - ENEMY_HIT_DEV && distanceY <= HERO_HEIGHT / 2 - ENEMY_HIT_DEV && hero.hp > 0)
+
+	if (distanceX <= HERO_WIDTH / 2 - ENEMY_HIT_DEV && distanceY <= HERO_HEIGHT / 2 - ENEMY_HIT_DEV && hero.health > 0)
 	{
-		hero.hp -= damage;
+		hero.health -= damage;
 		status = DOWN_STATUS;
 	}
 }
@@ -387,7 +409,7 @@ void Bullet::hit(int damage, int width, int height)
 void Hero::init()
 {
 	rect = { SCREEN_WIDTH / 2 - HERO_WIDTH / 2, SCREEN_HEIGHT - HERO_HEIGHT - 40, HERO_WIDTH, HERO_HEIGHT };
-	hp = HERO_HP;
+	health = HERO_HP;
 	status = ALIVE_STATUS;
 	appearance = APPEARANCE1;
 	bombCount = HERO_BOMB_INIT_COUNT;
@@ -411,19 +433,17 @@ void Hero::fire()
 	}
 }
 
-template <class Enemy>
-void Hero::releaseBomb(vector <Enemy> &enemy, int score)
+template <class Enemy> void Hero::releaseBomb(vector <Enemy> &enemy, int score)
 {
 	for (int i = 0; i < enemy.size(); i++)
 	{
-		enemy[i].hp = 0;
+		enemy[i].health = 0;
 		enemy[i].status = DOWN_STATUS;
 		game.score += score;
 	}
 }
 
-template <class Enemy>
-void Hero::crash(vector <Enemy> &enemy, int width, int height, int score)
+template <class Enemy> void Hero::crash(vector <Enemy> &enemy, int width, int height, int score)
 {
 	if (status == ALIVE_STATUS)
 	{
@@ -434,8 +454,8 @@ void Hero::crash(vector <Enemy> &enemy, int width, int height, int score)
 
 			if (distanceX <= (HERO_WIDTH + width) / 2 - CRASH_DEV && distanceY <= (HERO_HEIGHT + height) / 2 - CRASH_DEV && enemy[i].status == ALIVE_STATUS)
 			{
-				hp = 0;
-				enemy[i].hp = 0;
+				health = 0;
+				enemy[i].health = 0;
 				game.score += score;
 			}
 		}
@@ -448,18 +468,18 @@ void Hero::display()
 	{
 		if (status == ALIVE_STATUS)
 		{
-			if (appearance == APPEARANCE1) { window.image = window.heroImg[0]; }
-			else if (appearance = APPEARANCE2) { window.image = window.heroImg[1]; }
+			if (appearance == APPEARANCE1) { window.temp = window.heroImg[0]; }
+			else if (appearance = APPEARANCE2) { window.temp = window.heroImg[1]; }
 		}
-		else { window.image = window.heroImg[status + 1]; }
-		SDL_BlitSurface(window.image, NULL, window.surface, &rect);
+		else { window.temp = window.heroImg[status + 1]; }
+		SDL_BlitSurface(window.temp, NULL, window.surface, &rect);
 	}
 }
 
 Enemy0::Enemy0(int enemyX, int enemyY)
 {
 	rect = { enemyX, enemyY, ENEMY0_WIDTH, ENEMY0_HEIGHT };
-	hp = ENEMY0_HP;
+	health = ENEMY0_HP;
 	status = ALIVE_STATUS;
 	appearance = APPEARANCE1;
 }
@@ -476,7 +496,7 @@ void Enemy0::display()
 Enemy1::Enemy1(int enemyX, int enemyY)
 {
 	rect = { enemyX, enemyY, ENEMY1_WIDTH, ENEMY1_HEIGHT };
-	hp = ENEMY1_HP;
+	health = ENEMY1_HP;
 	status = ALIVE_STATUS;
 	appearance = APPEARANCE1;
 }
@@ -495,26 +515,25 @@ void Enemy1::display()
 {
 	if (status < ENEMY1_STATUS_MAX)
 	{
-		if (status == ALIVE_STATUS && hp > ENEMY1_HP / 2) { window.image = window.enemy1Img[0]; }
-		else if (status == ALIVE_STATUS && hp <= ENEMY1_HP / 2) { window.image = window.enemy1Img[1]; }
-		else { window.image = window.enemy1Img[status + 1]; }
+		if (status == ALIVE_STATUS) { window.temp = window.enemy1Img[int(health <= ENEMY1_HP / 2)]; }
+		else { window.temp = window.enemy1Img[status + 1]; }
 
-		if (rect.y < 0) { window.overflowBlit(window.image, rect); }
-		else { SDL_BlitSurface(window.image, NULL, window.surface, &rect); }
+		if (rect.y < 0) { window.overflowBlit(window.temp, rect); }
+		else { SDL_BlitSurface(window.temp, NULL, window.surface, &rect); }
 	}
 }
 
 Enemy2::Enemy2(int enemyX, int enemyY)
 {
 	rect = { enemyX, enemyY, ENEMY2_WIDTH, ENEMY2_HEIGHT };
-	hp = ENEMY2_HP;
+	health = ENEMY2_HP;
 	appearance = APPEARANCE1;
 	status = ALIVE_STATUS;
 }
 
 void Enemy2::fire()
 {
-	if (status == ALIVE_STATUS && hp > ENEMY2_HP / 2)
+	if (status == ALIVE_STATUS && health > ENEMY2_HP / 2)
 	{
 		int bulletX = rect.x + ENEMY2_WIDTH / 2 - ENEMY2_BULLET_WIDTH / 2 + 1;
 		int bulletY = rect.y + ENEMY2_HEIGHT;
@@ -526,16 +545,18 @@ void Enemy2::display()
 {
 	if (status < ENEMY2_STATUS_MAX)
 	{
-		if (status == ALIVE_STATUS && hp > ENEMY2_HP / 2)
+		if (status == ALIVE_STATUS)
 		{
-			if (appearance == APPEARANCE1) { window.image = window.enemy2Img[0]; }
-			else if (appearance == APPEARANCE2) { window.image = window.enemy2Img[1]; }
+			switch (bool(health > ENEMY2_HP / 2))
+			{
+				case true: window.temp = window.enemy2Img[appearance]; break;
+				case false: window.temp = window.enemy2Img[2]; break;
+			}
 		}
-		else if (status == 0 && hp <= ENEMY2_HP / 2) { window.image = window.enemy2Img[2]; }
-		else { window.image = window.enemy2Img[status + 2]; }
+		else { window.temp = window.enemy2Img[status + 2]; }
 
-		if (rect.y < 0) { window.overflowBlit(window.image, rect); }
-		else { SDL_BlitSurface(window.image, NULL, window.surface, &rect); }
+		if (rect.y < 0) { window.overflowBlit(window.temp, rect); }
+		else { SDL_BlitSurface(window.temp, NULL, window.surface, &rect); }
 	}
 }
 
@@ -546,7 +567,8 @@ HeroBullet::HeroBullet(int bulletX, int bulletY)
 }
 
 void HeroBullet::move() { rect.y -= HERO_BULLET_SPEED; }
-void HeroBullet::miss() { if (rect.y <= -HERO_BULLET_HEIGHT) { status = DOWN_STATUS; } }
+
+void HeroBullet::miss() { status = (rect.y <= -HERO_BULLET_HEIGHT) ? DOWN_STATUS : ALIVE_STATUS; }
 
 void HeroBullet::display()
 {
@@ -554,19 +576,18 @@ void HeroBullet::display()
 	else { SDL_BlitSurface(window.heroBulletImg, NULL, window.surface, &rect); }
 }
 
-template <class Enemy>
-void HeroBullet::hit(vector <Enemy> &enemy, int width, int height, int score)
+template <class Enemy> void HeroBullet::hit(vector <Enemy> &enemy, int width, int height, int score)
 {
 	for (int i = 0; i < enemy.size(); i++)
 	{
 		int distanceX = SDL_abs((rect.x + HERO_BULLET_WIDTH / 2) - (enemy[i].rect.x + width / 2));
 		int distanceY = SDL_abs((rect.y + HERO_BULLET_HEIGHT / 2) - (enemy[i].rect.y + height / 2));
 
-		if (distanceX <= width / 2 - HERO_HIT_DEV && distanceY <= height / 2 - HERO_HIT_DEV && enemy[i].hp > 0)
+		if (distanceX <= width / 2 - HERO_HIT_DEV && distanceY <= height / 2 - HERO_HIT_DEV && enemy[i].health > 0)
 		{
-			enemy[i].hp -= HERO_BULLET_DAMAGE;
+			enemy[i].health -= HERO_BULLET_DAMAGE;
 			status = DOWN_STATUS;
-			if (enemy[i].hp <= 0) { game.score += score; }
+			game.score += (enemy[i].health <= 0) ? score : 0;
 		}
 	}
 }
