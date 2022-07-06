@@ -167,18 +167,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="planewar.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="config.h" />
-    <ClInclude Include="planewar.h" />
-    <ClInclude Include="resource.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="PlaneWar.rc" />
-  </ItemGroup>
-  <ItemGroup>
     <Image Include="Img\background.png" />
     <Image Include="Img\enemy0_1.png" />
     <Image Include="Img\enemy0_2.png" />
@@ -210,6 +198,21 @@
     <Image Include="Img\hero6.png" />
     <Image Include="Img\hero_bullet.png" />
     <Image Include="Img\icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Sources\config.h" />
+    <ClInclude Include="Sources\header.h" />
+    <ClInclude Include="Sources\planewar.h" />
+    <ClInclude Include="Sources\plane.h" />
+    <ClInclude Include="Sources\resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Sources\main.cpp" />
+    <ClCompile Include="Sources\planewar.cpp" />
+    <ClCompile Include="Sources\plane.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Sources\resource.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

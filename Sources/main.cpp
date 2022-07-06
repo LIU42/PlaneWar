@@ -2,17 +2,7 @@
 
 using namespace std;
 
-Window window;
-Game game;
-Hero hero;
-
-vector <Enemy0> enemy0;
-vector <Enemy1> enemy1;
-vector <Enemy2> enemy2;
-
-vector <HeroBullet> heroBullet;
-vector <Enemy1Bullet> enemy1Bullet;
-vector <Enemy2Bullet> enemy2Bullet;
+MainGame game;
 
 int main(int arg, char* argv[])
 {
@@ -20,12 +10,11 @@ int main(int arg, char* argv[])
 	Uint32 endTick;
 	INT32 delayTick;
 
-	window.init();
-	window.initColor();
-	window.loadImage();
-	window.loadFonts();
-
-	game.init();
+	game.initWindow();
+	game.initGame();
+	game.initColor();
+	game.loadImage();
+	game.loadFonts();
 	game.addTimer();
 
 	while (game.status != EXIT)
@@ -33,7 +22,7 @@ int main(int arg, char* argv[])
 		startTick = SDL_GetTicks();
 
 		game.update();
-		game.events();
+		game.control();
 		game.display();
 
 		endTick = SDL_GetTicks();
@@ -41,6 +30,6 @@ int main(int arg, char* argv[])
 
 		SDL_Delay((delayTick > 0) ? delayTick : 0);
 	}
-	window.close();
+	game.close();
 	return 0;
 }
