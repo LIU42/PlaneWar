@@ -10,6 +10,8 @@ int main(int arg, char* argv[])
 	Uint32 endTick;
 	INT32 delayTick;
 
+	srand((unsigned)time(NULL));
+
 	game.initWindow();
 	game.initGame();
 	game.initColor();

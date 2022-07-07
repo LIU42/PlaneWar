@@ -152,7 +152,6 @@ void MainGame::initGame()
 	heroBullet.clear();
 	enemy1Bullet.clear();
 	enemy2Bullet.clear();
-	srand((unsigned)time(NULL));
 }
 
 void MainGame::addEnemy(vector <Enemy>& enemy, double appendP, int id, int width, int height, int health, int appendScore)
