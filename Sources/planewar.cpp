@@ -256,8 +256,13 @@ void MainGame::overflowBlit(SDL_Surface* surface, SDL_Rect rect)
 
 void MainGame::displayText(const char* text, TTF_Font* font, int x, int y, SDL_Color color)
 {
-	SDL_Surface* textSurface = TTF_RenderText_Blended(font, text, color);
-	SDL_Rect textRect = { x, y, TEXT_RECT_WIDTH, TEXT_RECT_HEIGHT };
+	static SDL_Surface* textSurface = nullptr;
+	static SDL_Rect textRect = SDL_Rect();
+
+	textSurface = TTF_RenderText_Blended(font, text, color);
+	textRect.x = x;
+	textRect.y = y;
+
 	SDL_BlitSurface(textSurface, NULL, image.surface, &textRect);
 	SDL_FreeSurface(textSurface);
 }
@@ -308,8 +313,8 @@ void MainGame::displayInfo()
 	{
 		SDL_snprintf(text, INFO_MAX_LEN, "score: %d", score);
 		displayText(text, font.info, BORDER_TEXT, SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE), color.black);
-		SDL_snprintf(text, INFO_MAX_LEN, "HP: %d%%", hero.health);
-		displayText(text, font.info, SCREEN_WIDTH - (80 + BORDER_TEXT), SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE), ((hero.health > 30) ? color.black : color.red));
+		SDL_snprintf(text, INFO_MAX_LEN, "HP: %d%%", hero.hp);
+		displayText(text, font.info, SCREEN_WIDTH - (80 + BORDER_TEXT), SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE), ((hero.hp > 30) ? color.black : color.red));
 		SDL_snprintf(text, INFO_MAX_LEN, "BOMB: %d", hero.bombCount);
 		displayText(text, font.info, BORDER_TEXT, BORDER_TEXT, color.black);
 	}

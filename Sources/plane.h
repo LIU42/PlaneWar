@@ -11,7 +11,7 @@ class Plane
 		SDL_Surface* image;
 		SDL_Rect rect;
 		int id;
-		int health;
+		int hp;
 		int status;
 		int appearance;
 

@@ -20,16 +20,16 @@ void Plane::miss(int statusMax)
 {
 	if (rect.y > SCREEN_HEIGHT)
 	{
-		health = 0;
+		hp = 0;
 		status = statusMax;
 	}
 }
 
 void Plane::down(int statusMax)
 {
-	if (health <= 0 && game.status == PLAYING)
+	if (hp <= 0 && game.status == PLAYING)
 	{
-		health = 0;
+		hp = 0;
 		status += (status < statusMax) ? 1 : 0;
 	}
 }
@@ -37,7 +37,7 @@ void Plane::down(int statusMax)
 void Hero::init()
 {
 	rect = { SCREEN_WIDTH / 2 - HERO_WIDTH / 2, SCREEN_HEIGHT - HERO_HEIGHT - 40, HERO_WIDTH, HERO_HEIGHT };
-	health = HERO_HP;
+	hp = HERO_HP;
 	status = ALIVE_STATUS;
 	appearance = APPEARANCE1;
 	bombCount = HERO_BOMB_INIT_COUNT;
@@ -66,7 +66,7 @@ void Hero::releaseBomb(vector <Enemy>& enemy, int score)
 {
 	for (int i = 0; i < enemy.size(); i++)
 	{
-		enemy[i].health = 0;
+		enemy[i].hp = 0;
 		enemy[i].status = DOWN_STATUS;
 		game.score += score;
 	}
@@ -83,8 +83,8 @@ void Hero::crash(vector <Enemy>& enemy, int score)
 
 			if (distanceX <= (HERO_WIDTH + enemy[i].rect.w) / 2 - CRASH_DEV && distanceY <= (HERO_HEIGHT + enemy[i].rect.h) / 2 - CRASH_DEV && enemy[i].status == ALIVE_STATUS)
 			{
-				health = 0;
-				enemy[i].health = 0;
+				hp = 0;
+				enemy[i].hp = 0;
 				game.score += score;
 			}
 		}
@@ -108,7 +108,7 @@ Enemy::Enemy(int x, int y, int id, int width, int height, int health)
 {
 	this->rect = { x, y, width, height };
 	this->id = id;
-	this->health = health;
+	this->hp = health;
 	this->status = ALIVE_STATUS;
 	this->appearance = APPEARANCE1;
 }
@@ -124,7 +124,7 @@ void Enemy::fire()
 
 			game.enemy1Bullet.push_back(Bullet(x, y, ENEMY1_BULLET_ID, ENEMY1_BULLET_WIDTH, ENEMY1_BULLET_HEIGHT));
 		}
-		else if (id == ENEMY2_ID && health > ENEMY2_HP / 2)
+		else if (id == ENEMY2_ID && hp > ENEMY2_HP / 2)
 		{
 			int x = rect.x + ENEMY2_WIDTH / 2 - ENEMY2_BULLET_WIDTH / 2 + 1;
 			int y = rect.y + ENEMY2_HEIGHT;
@@ -146,7 +146,7 @@ void Enemy::display(int statusMax)
 		{
 			switch (bool(status == ALIVE_STATUS))
 			{
-				case true: image = game.image.enemy1[int(health <= ENEMY1_HP / 2)]; break;
+				case true: image = game.image.enemy1[int(hp <= ENEMY1_HP / 2)]; break;
 				case false: image = game.image.enemy1[status + 1]; break;
 			}
 		}
@@ -154,7 +154,7 @@ void Enemy::display(int statusMax)
 		{
 			if (status == ALIVE_STATUS)
 			{
-				switch (bool(health > ENEMY2_HP / 2))
+				switch (bool(hp > ENEMY2_HP / 2))
 				{
 					case true: image = game.image.enemy2[appearance]; break;
 					case false: image = game.image.enemy2[2]; break;
@@ -200,9 +200,9 @@ void Bullet::hit(int damage)
 	int distanceX = SDL_abs((rect.x + rect.w / 2) - (game.hero.rect.x + HERO_WIDTH / 2));
 	int distanceY = SDL_abs((rect.y + rect.h / 2) - (game.hero.rect.y + HERO_HEIGHT / 2));
 
-	if (distanceX <= HERO_WIDTH / 2 - ENEMY_HIT_DEV && distanceY <= HERO_HEIGHT / 2 - ENEMY_HIT_DEV && game.hero.health > 0)
+	if (distanceX <= HERO_WIDTH / 2 - ENEMY_HIT_DEV && distanceY <= HERO_HEIGHT / 2 - ENEMY_HIT_DEV && game.hero.hp > 0)
 	{
-		game.hero.health -= damage;
+		game.hero.hp -= damage;
 		status = DOWN_STATUS;
 	}
 }
@@ -214,12 +214,12 @@ void Bullet::hit(vector <Enemy>& enemy, int score)
 		int distanceX = SDL_abs((rect.x + HERO_BULLET_WIDTH / 2) - (enemy[i].rect.x + enemy[i].rect.w / 2));
 		int distanceY = SDL_abs((rect.y + HERO_BULLET_HEIGHT / 2) - (enemy[i].rect.y + enemy[i].rect.h / 2));
 
-		if (distanceX <= enemy[i].rect.w / 2 - HERO_HIT_DEV && distanceY <= enemy[i].rect.h / 2 - HERO_HIT_DEV && enemy[i].health > 0)
+		if (distanceX <= enemy[i].rect.w / 2 - HERO_HIT_DEV && distanceY <= enemy[i].rect.h / 2 - HERO_HIT_DEV && enemy[i].hp > 0)
 		{
-			enemy[i].health -= HERO_BULLET_DAMAGE;
+			enemy[i].hp -= HERO_BULLET_DAMAGE;
 			status = DOWN_STATUS;
 
-			if (enemy[i].health <= 0) { game.score += score; }
+			if (enemy[i].hp <= 0) { game.score += score; }
 		}
 	}
 }
