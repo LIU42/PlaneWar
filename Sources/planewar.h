@@ -84,7 +84,6 @@ class MainGame
 		int status;
 		int score;
 		int bestScore;
-		int backgroundY;
 
 	public:
 		SDL_RWops* getResource(HINSTANCE, LPCWSTR, LPCWSTR);
@@ -104,11 +103,14 @@ class MainGame
 		void close();
 
 	public:
+		void update();
+		void events();
+		void display();
+
+	public:
 		void addEnemy(vector <Enemy>&, EnemyData&);
 		void updateEnemy(vector <Enemy>&, EnemyData&);
 		void updateBullet(vector <Bullet>&);
-		void update();
-		void events();
 
 	public:
 		void overflowBlit(SDL_Surface*, SDL_Rect&);
@@ -116,7 +118,6 @@ class MainGame
 		void displayBackground();
 		void displayPlane();
 		void displayInfo();
-		void display();
 };
 
 extern MainGame game;

@@ -29,9 +29,9 @@ void MainGame::initWindow()
 
 void MainGame::initData()
 {
-	enemy0Data = { ENEMY0_ID, ENEMY0_HP, ENEMY0_WIDTH, ENEMY0_HEIGHT, ENEMY0_SPEED, ENEMY0_INDEX_MAX, ENEMY0_APPEND_SCORE, PR_ENEMY0 };
-	enemy1Data = { ENEMY1_ID, ENEMY1_HP, ENEMY1_WIDTH, ENEMY1_HEIGHT, ENEMY1_SPEED, ENEMY1_INDEX_MAX, ENEMY1_APPEND_SCORE, PR_ENEMY1 };
-	enemy2Data = { ENEMY2_ID, ENEMY2_HP, ENEMY2_WIDTH, ENEMY2_HEIGHT, ENEMY2_SPEED, ENEMY2_INDEX_MAX, ENEMY2_APPEND_SCORE, PR_ENEMY2 };
+	enemy0Data = { ENEMY0_ID, ENEMY0_HP, ENEMY0_WIDTH, ENEMY0_HEIGHT, ENEMY0_SPEED, ENEMY0_INDEX_MAX, ENEMY0_APPEND_SCORE, P_ENEMY0 };
+	enemy1Data = { ENEMY1_ID, ENEMY1_HP, ENEMY1_WIDTH, ENEMY1_HEIGHT, ENEMY1_SPEED, ENEMY1_INDEX_MAX, ENEMY1_APPEND_SCORE, P_ENEMY1 };
+	enemy2Data = { ENEMY2_ID, ENEMY2_HP, ENEMY2_WIDTH, ENEMY2_HEIGHT, ENEMY2_SPEED, ENEMY2_INDEX_MAX, ENEMY2_APPEND_SCORE, P_ENEMY2 };
 
 	heroBulletData = { HERO_BULLET_ID, HERO_BULLET_WIDTH, HERO_BULLET_HEIGHT, HERO_BULLET_SPEED, HERO_BULLET_DAMAGE };
 	enemy1BulletData = { ENEMY1_BULLET_ID, ENEMY1_BULLET_WIDTH, ENEMY1_BULLET_HEIGHT, ENEMY1_BULLET_SPEED, ENEMY1_BULLET_DAMAGE };
@@ -172,15 +172,14 @@ void MainGame::initGame()
 
 void MainGame::addEnemy(vector <Enemy>& enemy, EnemyData& data)
 {
-	static Point pos;
-
 	if (score >= data.appendScore)
 	{
-		if ((rand() % (int)1E4) / 1E4 < data.appendPr)
+		if (fmod(rand(), RAND_MOD) / RAND_MOD < data.probability)
 		{
-			pos.x = rand() % (SCREEN_WIDTH - data.width - 2 * BORDER_X) + BORDER_X;
-			pos.y = -data.height;
-			enemy.push_back(Enemy(pos, data));
+			int rangeMax = SCREEN_WIDTH - BORDER_X - data.width;
+			int rangeMin = BORDER_X;
+
+			enemy.push_back(Enemy({ rand() % (rangeMax - rangeMin) + rangeMin, -data.height }, data));
 		}
 	}
 }
@@ -201,7 +200,7 @@ void MainGame::updateBullet(vector <Bullet>& bullet)
 	{
 		bullet[i].move();
 		bullet[i].miss();
-		bullet[i].hit();
+		bullet[i].hitHero();
 		if (!bullet[i].isAlive) { bullet.erase(bullet.begin() + i--); }
 	}
 }
@@ -229,9 +228,9 @@ void MainGame::update()
 		{
 			heroBullet[i].move();
 			heroBullet[i].miss();
-			heroBullet[i].hit(enemy0, ENEMY0_SCORE);
-			heroBullet[i].hit(enemy1, ENEMY1_SCORE);
-			heroBullet[i].hit(enemy2, ENEMY2_SCORE);
+			heroBullet[i].hitEnemy(enemy0, ENEMY0_SCORE);
+			heroBullet[i].hitEnemy(enemy1, ENEMY1_SCORE);
+			heroBullet[i].hitEnemy(enemy2, ENEMY2_SCORE);
 			if (!heroBullet[i].isAlive) { heroBullet.erase(heroBullet.begin() + i--); }
 		}
 	}
@@ -297,18 +296,19 @@ void MainGame::displayBackground()
 {
 	static SDL_Rect selfRect;
 	static SDL_Rect desRect;
+	static int backgroundScrollPos;
 
 	if (status == PLAYING)
 	{
-		if (backgroundY == SCREEN_HEIGHT) { backgroundY = 0; }
-		backgroundY += BACKGROUND_SCROLL_SPEED;
+		if (backgroundScrollPos == SCREEN_HEIGHT) { backgroundScrollPos = 0; }
+		backgroundScrollPos += BACKGROUND_SCROLL_SPEED;
 	}
-	selfRect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - backgroundY };
-	desRect = { 0, backgroundY, SCREEN_WIDTH, SCREEN_HEIGHT - backgroundY };
+	selfRect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - backgroundScrollPos };
+	desRect = { 0, backgroundScrollPos, SCREEN_WIDTH, SCREEN_HEIGHT - backgroundScrollPos };
 	SDL_BlitSurface(image.background, &selfRect, image.surface, &desRect);
 
-	selfRect = { 0, SCREEN_HEIGHT - backgroundY, SCREEN_WIDTH, backgroundY };
-	desRect = { 0, 0, SCREEN_WIDTH, backgroundY };
+	selfRect = { 0, SCREEN_HEIGHT - backgroundScrollPos, SCREEN_WIDTH, backgroundScrollPos };
+	desRect = { 0, 0, SCREEN_WIDTH, backgroundScrollPos };
 	SDL_BlitSurface(image.background, &selfRect, image.surface, &desRect);
 }
 
@@ -339,8 +339,8 @@ void MainGame::displayInfo()
 	{
 		SDL_snprintf(text, INFO_MAX_LEN, "score: %d", score);
 		displayText(text, font.info, { BORDER_TEXT, SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE) }, color.black);
-		SDL_snprintf(text, INFO_MAX_LEN, "HP: %d%%", hero.hp);
-		displayText(text, font.info, { SCREEN_WIDTH - (HP_LENGTH + BORDER_TEXT), SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE) }, ((hero.hp > HERO_HP_ALERT) ? color.black : color.red));
+		SDL_snprintf(text, INFO_MAX_LEN, "HP: %d%%", hero.health);
+		displayText(text, font.info, { SCREEN_WIDTH - (HP_LENGTH + BORDER_TEXT), SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE) }, ((hero.health > HERO_HP_ALERT) ? color.black : color.red));
 		SDL_snprintf(text, INFO_MAX_LEN, "BOMB: %d", hero.bombCount);
 		displayText(text, font.info, { BORDER_TEXT, BORDER_TEXT }, color.black);
 	}

@@ -11,19 +11,19 @@ struct Point
 
 struct EnemyData
 {
-	int id;
-	int hp;
+	int identity;
+	int health;
 	int width;
 	int height;
 	int speed;
 	int indexMax;
 	int appendScore;
-	double appendPr;
+	double probability;
 };
 
 struct BulletData
 {
-	int id;
+	int identity;
 	int width;
 	int height;
 	int speed;
@@ -34,8 +34,8 @@ class Plane
 {
 	public:
 		SDL_Rect rect;
-		int id;
-		int hp;
+		int identity;
+		int health;
 		int speed;
 		int index;
 		int indexMax;
@@ -76,7 +76,7 @@ class Bullet
 {
 	public:
 		SDL_Rect rect;
-		int id;
+		int identity;
 		int speed;
 		int damage;
 		bool isAlive;
@@ -85,8 +85,8 @@ class Bullet
 		Bullet(Point, BulletData&);
 		void move();
 		void miss();
-		void hit();
-		void hit(vector <Enemy>&, int);
+		void hitHero();
+		void hitEnemy(vector <Enemy>&, int);
 		void display();
 };
 
