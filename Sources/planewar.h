@@ -6,7 +6,7 @@
 #include <SDL_ttf.h>
 #include <Windows.h>
 #include <time.h>
-#include <vector>
+#include <list>
 
 #include "config.h"
 #include "resource.h"
@@ -73,12 +73,12 @@ class MainGame
 
 	public:
 		Hero hero;
-		vector <Enemy> enemy0;
-		vector <Enemy> enemy1;
-		vector <Enemy> enemy2;
-		vector <Bullet> heroBullet;
-		vector <Bullet> enemy1Bullet;
-		vector <Bullet> enemy2Bullet;
+		list <Enemy> enemy0;
+		list <Enemy> enemy1;
+		list <Enemy> enemy2;
+		list <Bullet> heroBullet;
+		list <Bullet> enemy1Bullet;
+		list <Bullet> enemy2Bullet;
 
 	public:
 		int status;
@@ -108,9 +108,9 @@ class MainGame
 		void display();
 
 	public:
-		void addEnemy(vector <Enemy>&, EnemyData&);
-		void updateEnemy(vector <Enemy>&, EnemyData&);
-		void updateBullet(vector <Bullet>&);
+		void addEnemy(list <Enemy>&, EnemyData&);
+		void updateEnemy(list <Enemy>&, EnemyData&);
+		void updateBullet(list <Bullet>&);
 
 	public:
 		void overflowBlit(SDL_Surface*, SDL_Rect&);

@@ -73,7 +73,7 @@ Uint32 planeAnimateCallback(Uint32 interval, void* param)
 	if (game.status == PLAYING)
 	{
 		if (tick % HERO_CHANGE_INTERVAL == 0) { game.hero.animate(); }
-		if (tick % ENEMY2_CHANGE_INTERVAL == 0) { for (int i = 0; i < game.enemy2.size(); i++) { game.enemy2[i].animate(); } }
+		if (tick % ENEMY2_CHANGE_INTERVAL == 0) { for (auto it = game.enemy2.begin(); it != game.enemy2.end(); ++it) { it->animate(); } }
 	}
 	tick += interval;
 	return interval;
@@ -86,8 +86,8 @@ Uint32 planeFireCallback(Uint32 interval, void* param)
 	if (game.status == PLAYING)
 	{
 		if (tick % HERO_FIRE_INTERVAL == 0) { game.hero.fire(); }
-		if (tick % ENEMY1_FIRE_INTERVAL == 0) { for (int i = 0; i < game.enemy1.size(); i++) { game.enemy1[i].fire(); } }
-		if (tick % ENEMY2_FIRE_INTERVAL == 0) { for (int i = 0; i < game.enemy2.size(); i++) { game.enemy2[i].fire(); } }
+		if (tick % ENEMY1_FIRE_INTERVAL == 0) { for (auto it = game.enemy1.begin(); it != game.enemy1.end(); ++it) { it->fire(); } }
+		if (tick % ENEMY2_FIRE_INTERVAL == 0) { for (auto it = game.enemy2.begin(); it != game.enemy2.end(); ++it) { it->fire(); } }
 	}
 	tick += interval;
 	return interval;
@@ -98,9 +98,9 @@ Uint32 planeDownCallback(Uint32 interval, void* param)
 	if (game.status == PLAYING)
 	{
 		game.hero.down();
-		for (int i = 0; i < game.enemy0.size(); i++) { game.enemy0[i].down(); }
-		for (int i = 0; i < game.enemy1.size(); i++) { game.enemy1[i].down(); }
-		for (int i = 0; i < game.enemy2.size(); i++) { game.enemy2[i].down(); }
+		for (auto it = game.enemy0.begin(); it != game.enemy0.end(); ++it) { it->down(); }
+		for (auto it = game.enemy1.begin(); it != game.enemy1.end(); ++it) { it->down(); }
+		for (auto it = game.enemy2.begin(); it != game.enemy2.end(); ++it) { it->down(); }
 	}
 	return interval;
 }
@@ -170,7 +170,7 @@ void MainGame::initGame()
 	enemy2Bullet.clear();
 }
 
-void MainGame::addEnemy(vector <Enemy>& enemy, EnemyData& data)
+void MainGame::addEnemy(list <Enemy>& enemy, EnemyData& data)
 {
 	if (score >= data.appendScore)
 	{
@@ -184,24 +184,26 @@ void MainGame::addEnemy(vector <Enemy>& enemy, EnemyData& data)
 	}
 }
 
-void MainGame::updateEnemy(vector <Enemy>& enemy, EnemyData& data)
+void MainGame::updateEnemy(list <Enemy>& enemy, EnemyData& data)
 {
-	for (int i = 0; i < enemy.size(); i++)
+	for (auto it = enemy.begin(); it != enemy.end();)
 	{
-		enemy[i].move();
-		enemy[i].miss();
-		if (enemy[i].index == data.indexMax) { enemy.erase(enemy.begin() + i--); }
+		it->move();
+		it->miss();
+
+		(it->index == data.indexMax) ? (it = enemy.erase(it)) : (++it);
 	}
 }
 
-void MainGame::updateBullet(vector <Bullet>& bullet)
+void MainGame::updateBullet(list <Bullet>& bullet)
 {
-	for (int i = 0; i < bullet.size(); i++)
+	for (auto it = bullet.begin(); it != bullet.end();)
 	{
-		bullet[i].move();
-		bullet[i].miss();
-		bullet[i].hitHero();
-		if (!bullet[i].isAlive) { bullet.erase(bullet.begin() + i--); }
+		it->move();
+		it->miss();
+		it->hitHero();
+
+		(it->isAlive) ? (++it) : (it = bullet.erase(it));
 	}
 }
 
@@ -224,14 +226,15 @@ void MainGame::update()
 		updateBullet(enemy1Bullet);
 		updateBullet(enemy2Bullet);
 
-		for (int i = 0; i < heroBullet.size(); i++)
+		for (auto it = heroBullet.begin(); it != heroBullet.end();)
 		{
-			heroBullet[i].move();
-			heroBullet[i].miss();
-			heroBullet[i].hitEnemy(enemy0, ENEMY0_SCORE);
-			heroBullet[i].hitEnemy(enemy1, ENEMY1_SCORE);
-			heroBullet[i].hitEnemy(enemy2, ENEMY2_SCORE);
-			if (!heroBullet[i].isAlive) { heroBullet.erase(heroBullet.begin() + i--); }
+			it->move();
+			it->miss();
+			it->hitEnemy(enemy0, ENEMY0_SCORE);
+			it->hitEnemy(enemy1, ENEMY1_SCORE);
+			it->hitEnemy(enemy2, ENEMY2_SCORE);
+
+			(it->isAlive) ? (++it) : (it = heroBullet.erase(it));
 		}
 	}
 	if (status == END && score > bestScore) { bestScore = score; }
@@ -317,12 +320,12 @@ void MainGame::displayPlane()
 	if (status == PLAYING)
 	{
 		hero.display();
-		for (int i = 0; i < enemy0.size(); i++) { enemy0[i].display(); }
-		for (int i = 0; i < enemy1.size(); i++) { enemy1[i].display(); }
-		for (int i = 0; i < enemy2.size(); i++) { enemy2[i].display(); }
-		for (int i = 0; i < heroBullet.size(); i++) { heroBullet[i].display(); }
-		for (int i = 0; i < enemy1Bullet.size(); i++) { enemy1Bullet[i].display(); }
-		for (int i = 0; i < enemy2Bullet.size(); i++) { enemy2Bullet[i].display(); }
+		for (auto it = enemy0.begin(); it != enemy0.end(); ++it) { it->display(); }
+		for (auto it = enemy1.begin(); it != enemy1.end(); ++it) { it->display(); }
+		for (auto it = enemy2.begin(); it != enemy2.end(); ++it) { it->display(); }
+		for (auto it = heroBullet.begin(); it != heroBullet.end(); ++it) { it->display(); }
+		for (auto it = enemy1Bullet.begin(); it != enemy1Bullet.end(); ++it) { it->display(); }
+		for (auto it = enemy2Bullet.begin(); it != enemy2Bullet.end(); ++it) { it->display(); }
 	}
 }
 

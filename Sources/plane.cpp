@@ -68,28 +68,28 @@ void Hero::fire()
 	}
 }
 
-void Hero::releaseBomb(vector <Enemy>& enemy, int score)
+void Hero::releaseBomb(list <Enemy>& enemy, int score)
 {
-	for (int i = 0; i < enemy.size(); i++)
+	for (auto it = enemy.begin(); it != enemy.end(); ++it)
 	{
-		enemy[i].isAlive = false;
+		it->isAlive = false;
 		game.score += score;
 	}
 }
 
-void Hero::crash(vector <Enemy>& enemy, int score)
+void Hero::crash(list <Enemy>& enemy, int score)
 {
 	if (isAlive)
 	{
-		for (int i = 0; i < enemy.size(); i++)
+		for (auto it = enemy.begin(); it != enemy.end(); ++it)
 		{
-			int distanceX = SDL_abs((rect.x + rect.w / 2) - (enemy[i].rect.x + enemy[i].rect.w / 2)) + CRASH_DIFF;
-			int distanceY = SDL_abs((rect.y + rect.h / 2) - (enemy[i].rect.y + enemy[i].rect.h / 2)) + CRASH_DIFF;
+			int distanceX = SDL_abs((rect.x + rect.w / 2) - (it->rect.x + it->rect.w / 2)) + CRASH_DIFF;
+			int distanceY = SDL_abs((rect.y + rect.h / 2) - (it->rect.y + it->rect.h / 2)) + CRASH_DIFF;
 
-			if (distanceX <= (HERO_WIDTH + enemy[i].rect.w) / 2 && distanceY <= (HERO_HEIGHT + enemy[i].rect.h) / 2 && enemy[i].isAlive)
+			if (distanceX <= (HERO_WIDTH + it->rect.w) / 2 && distanceY <= (HERO_HEIGHT + it->rect.h) / 2 && it->isAlive)
 			{
 				isAlive = false;
-				enemy[i].isAlive = false;
+				it->isAlive = false;
 				game.score += score;
 			}
 		}
@@ -202,19 +202,19 @@ void Bullet::hitHero()
 	}
 }
 
-void Bullet::hitEnemy(vector <Enemy>& enemy, int score)
+void Bullet::hitEnemy(list <Enemy>& enemy, int score)
 {
-	for (int i = 0; i < enemy.size(); i++)
+	for (auto it = enemy.begin(); it != enemy.end(); ++it)
 	{
-		int distanceX = SDL_abs((rect.x + rect.w / 2) - (enemy[i].rect.x + enemy[i].rect.w / 2)) + HERO_HIT_DIFF;
-		int distanceY = SDL_abs((rect.y + rect.h / 2) - (enemy[i].rect.y + enemy[i].rect.h / 2)) + HERO_HIT_DIFF;
+		int distanceX = SDL_abs((rect.x + rect.w / 2) - (it->rect.x + it->rect.w / 2)) + HERO_HIT_DIFF;
+		int distanceY = SDL_abs((rect.y + rect.h / 2) - (it->rect.y + it->rect.h / 2)) + HERO_HIT_DIFF;
 
-		if (distanceX <= enemy[i].rect.w / 2 && distanceY <= enemy[i].rect.h / 2 && enemy[i].health > 0)
+		if (distanceX <= it->rect.w / 2 && distanceY <= it->rect.h / 2 && it->health > 0)
 		{
-			enemy[i].health -= damage;
+			it->health -= damage;
 			isAlive = false;
 
-			if (enemy[i].health <= 0) { game.score += score; }
+			if (it->health <= 0) { game.score += score; }
 		}
 	}
 }

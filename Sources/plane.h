@@ -67,8 +67,8 @@ class Hero : public Plane
 		void init();
 		void move();
 		void fire();
-		void releaseBomb(vector <Enemy>&, int);
-		void crash(vector <Enemy>&, int);
+		void releaseBomb(list <Enemy>&, int);
+		void crash(list <Enemy>&, int);
 		void display();
 };
 
@@ -86,7 +86,7 @@ class Bullet
 		void move();
 		void miss();
 		void hitHero();
-		void hitEnemy(vector <Enemy>&, int);
+		void hitEnemy(list <Enemy>&, int);
 		void display();
 };
 
