@@ -1,36 +1,20 @@
 #include "planewar.h"
 
-MainGame game;
-
 int main(int argc, char* argv[])
 {
-	int startTick;
-	int endTick;
-	int delayTick;
+	MainGame game;
 
-	srand((unsigned)time(NULL));
+	Uint32 startTick = 0;
+	Uint32 endTIck = 0;
 
-	game.initWindow();
-	game.initData();
-	game.initGame();
-	game.initColor();
-	game.loadImage();
-	game.loadFonts();
-	game.addTimer();
-
-	while (game.status != EXIT)
+	while (game.isRunning())
 	{
 		startTick = SDL_GetTicks();
-
 		game.update();
 		game.events();
 		game.display();
-
-		endTick = SDL_GetTicks();
-		delayTick = (1000 / GAME_FPS) - (endTick - startTick);
-
-		SDL_Delay((delayTick > 0) ? delayTick : 0);
+		endTIck = SDL_GetTicks();
+		game.delay(startTick, endTIck);
 	}
-	game.close();
-	return 0;
+	return EXIT_SUCCESS;
 }

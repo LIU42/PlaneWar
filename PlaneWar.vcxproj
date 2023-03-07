@@ -167,18 +167,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Sources\config.h" />
-    <ClInclude Include="Sources\planewar.h" />
+    <ClInclude Include="Sources\bullet.h" />
     <ClInclude Include="Sources\plane.h" />
+    <ClInclude Include="Sources\planewar.h" />
     <ClInclude Include="Sources\resource.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Sources\main.cpp" />
-    <ClCompile Include="Sources\planewar.cpp" />
-    <ClCompile Include="Sources\plane.cpp" />
+    <ClInclude Include="Sources\template.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Sources\resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Sources\bullet.cpp" />
+    <ClCompile Include="Sources\main.cpp" />
+    <ClCompile Include="Sources\plane.cpp" />
+    <ClCompile Include="Sources\planewar.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

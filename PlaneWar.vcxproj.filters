@@ -15,18 +15,26 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Sources\config.h">
+    <ClInclude Include="Sources\resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Sources\planewar.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\bullet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
     <ClInclude Include="Sources\plane.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\resource.h">
+    <ClInclude Include="Sources\template.h">
       <Filter>头文件</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Sources\resource.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\main.cpp">
@@ -35,13 +43,11 @@
     <ClCompile Include="Sources\planewar.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\bullet.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
     <ClCompile Include="Sources\plane.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Sources\resource.rc">
-      <Filter>资源文件</Filter>
-    </ResourceCompile>
   </ItemGroup>
 </Project>

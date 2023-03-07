@@ -1,365 +1,427 @@
 #include "planewar.h"
+#include "template.h"
 
-SDL_RWops* MainGame::getResource(HINSTANCE hInst, LPCWSTR name, LPCWSTR type)
+SDL_RWops* MainGame::getResource(LPCWSTR name, LPCWSTR type)
 {
+	HINSTANCE hInst = windowInfo.info.win.hinstance;
 	HRSRC hRsrc = FindResource(hInst, name, type);
 	DWORD size = SizeofResource(hInst, hRsrc);
-	LPVOID data = LockResource(LoadResource(hInst, hRsrc));
+	HGLOBAL hGlobal = LoadResource(hInst, hRsrc);
+	LPVOID data = LockResource(hGlobal);
 	return SDL_RWFromConstMem(data, size);
 }
 
-SDL_Surface* MainGame::loadSurface(int id)
+SDL_Surface* MainGame::loadSurface(Uint32 id)
 {
-	SDL_RWops* src = getResource(hInstance, MAKEINTRESOURCE(id), TEXT("PNG"));
-	SDL_Surface* originSurface = IMG_LoadPNG_RW(src);
-	SDL_Surface* convertSurface = SDL_ConvertSurface(originSurface, image.format, NULL);
-	SDL_FreeSurface(originSurface);
-	SDL_FreeRW(src);
-	return convertSurface;
+	SDL_RWops* pResource = getResource(MAKEINTRESOURCE(id), TEXT("PNG"));
+	SDL_Surface* pOriginalSurface = IMG_LoadPNG_RW(pResource);
+	SDL_Surface* pConvertedSurface = SDL_ConvertSurface(pOriginalSurface, pFormat, NULL);
+	SDL_FreeSurface(pOriginalSurface);
+	SDL_FreeRW(pResource);
+	return pConvertedSurface;
+}
+
+Uint32 MainGame::addAliveScoreCallback(Uint32 interval, void* param)
+{
+	((MainGame*)param)->addAliveScore();
+	return interval;
+}
+
+int MainGame::getRandomInRange(int enemyWidth)
+{
+	int max = SCREEN_WIDTH - BORDER_X - enemyWidth;
+	int min = BORDER_X;
+
+	return rand() % (max - min) + min;
+}
+
+void MainGame::getVersion()
+{
+	windowInfo.version.major = SDL_MAJOR_VERSION;
+	windowInfo.version.minor = SDL_MINOR_VERSION;
+	windowInfo.version.patch = SDL_PATCHLEVEL;
+}
+
+void MainGame::initSystem()
+{
+	SDL_Init(SDL_INIT_EVERYTHING);
+	IMG_Init(IMG_INIT_PNG);
+	TTF_Init();
 }
 
 void MainGame::initWindow()
 {
-	SDL_Init(SDL_INIT_EVERYTHING);
-	hInstance = GetModuleHandle(0);
-	window = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-	keyStatus = SDL_GetKeyboardState(NULL);
-	SDL_GetWindowSize(window, &screen.w, &screen.h);
+	pWindow = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	pSurface = SDL_GetWindowSurface(pWindow);
+	pFormat = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA32);
+	pKeyStatus = SDL_GetKeyboardState(NULL);
+	screenRect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
+	SDL_GetWindowWMInfo(pWindow, &windowInfo);
 }
 
-void MainGame::initData()
+void MainGame::loadImages()
 {
-	enemy0Data = { ENEMY0_ID, ENEMY0_HP, ENEMY0_WIDTH, ENEMY0_HEIGHT, ENEMY0_SPEED, ENEMY0_INDEX_MAX, ENEMY0_APPEND_SCORE, P_ENEMY0 };
-	enemy1Data = { ENEMY1_ID, ENEMY1_HP, ENEMY1_WIDTH, ENEMY1_HEIGHT, ENEMY1_SPEED, ENEMY1_INDEX_MAX, ENEMY1_APPEND_SCORE, P_ENEMY1 };
-	enemy2Data = { ENEMY2_ID, ENEMY2_HP, ENEMY2_WIDTH, ENEMY2_HEIGHT, ENEMY2_SPEED, ENEMY2_INDEX_MAX, ENEMY2_APPEND_SCORE, P_ENEMY2 };
+	images.pBackground = loadSurface(IDB_PNG1);
+	images.pHeroBullet = loadSurface(IDB_PNG34);
+	images.pEnemy1Bullet = loadSurface(IDB_PNG32);
+	images.pEnemy2Bullet = loadSurface(IDB_PNG33);
 
-	heroBulletData = { HERO_BULLET_ID, HERO_BULLET_WIDTH, HERO_BULLET_HEIGHT, HERO_BULLET_SPEED, HERO_BULLET_DAMAGE };
-	enemy1BulletData = { ENEMY1_BULLET_ID, ENEMY1_BULLET_WIDTH, ENEMY1_BULLET_HEIGHT, ENEMY1_BULLET_SPEED, ENEMY1_BULLET_DAMAGE };
-	enemy2BulletData = { ENEMY2_BULLET_ID, ENEMY2_BULLET_WIDTH, ENEMY2_BULLET_HEIGHT, ENEMY2_BULLET_SPEED, ENEMY2_BULLET_DAMAGE };
-}
-
-void MainGame::initColor()
-{
-	color.black = COLOR_BLACK;
-	color.red = COLOR_RED;
-}
-
-void MainGame::loadImage()
-{
-	image.format = SDL_AllocFormat(IMG_FORMAT);
-	image.surface = SDL_GetWindowSurface(window);
-	image.background = loadSurface(IDB_PNG1);
-	image.heroBullet = loadSurface(IDB_PNG34);
-	image.enemy1Bullet = loadSurface(IDB_PNG32);
-	image.enemy2Bullet = loadSurface(IDB_PNG33);
-
-	for (int i = 0; i < HERO_INDEX_MAX; i++) { image.hero[i] = loadSurface(IDB_PNG25 + i); }
-	for (int i = 0; i < ENEMY0_INDEX_MAX; i++) { image.enemy0[i] = loadSurface(IDB_PNG2 + i); }
-	for (int i = 0; i < ENEMY1_INDEX_MAX; i++) { image.enemy1[i] = loadSurface(IDB_PNG8 + i); }
-	for (int i = 0; i < ENEMY2_INDEX_MAX; i++) { image.enemy2[i] = loadSurface(IDB_PNG15 + i); }
+	for (int i = 0; i < Hero::IMAGE_INDEX_MAX; i++) { images.pHero[i] = loadSurface(IDB_PNG25 + i); }
+	for (int i = 0; i < Enemy0::IMAGE_INDEX_MAX; i++) { images.pEnemy0[i] = loadSurface(IDB_PNG2 + i); }
+	for (int i = 0; i < Enemy1::IMAGE_INDEX_MAX; i++) { images.pEnemy1[i] = loadSurface(IDB_PNG8 + i); }
+	for (int i = 0; i < Enemy2::IMAGE_INDEX_MAX; i++) { images.pEnemy2[i] = loadSurface(IDB_PNG15 + i); }
 }
 
 void MainGame::loadFonts()
 {
-	TTF_Init();
-	font.title = TTF_OpenFontRW(getResource(hInstance, MAKEINTRESOURCE(IDR_FONT1), RT_FONT), 1, TITLE_FONT_SIZE);
-	font.info = TTF_OpenFontRW(getResource(hInstance, MAKEINTRESOURCE(IDR_FONT1), RT_FONT), 1, INFO_FONT_SIZE);
+	fonts.pTitle = TTF_OpenFontRW(getResource(MAKEINTRESOURCE(IDR_FONT1), RT_FONT), true, TITLE_FONT_SIZE);
+	fonts.pInfo = TTF_OpenFontRW(getResource(MAKEINTRESOURCE(IDR_FONT1), RT_FONT), true, INFO_FONT_SIZE);
 }
 
-Uint32 planeAnimateCallback(Uint32 interval, void* param)
+void MainGame::addTimers()
 {
-	static Uint32 tick = interval;
-
-	if (game.status == PLAYING)
-	{
-		if (tick % HERO_CHANGE_INTERVAL == 0) { game.hero.animate(); }
-		if (tick % ENEMY2_CHANGE_INTERVAL == 0) { for (auto it = game.enemy2.begin(); it != game.enemy2.end(); ++it) { it->animate(); } }
-	}
-	tick += interval;
-	return interval;
+	timers.addAliveScore = SDL_AddTimer(ADD_ALIVE_SCORE_INTERVAL, addAliveScoreCallback, this);
 }
 
-Uint32 planeFireCallback(Uint32 interval, void* param)
+void MainGame::freeImages()
 {
-	static Uint32 tick = interval;
+	SDL_FreeSurface(images.pBackground);
+	SDL_FreeSurface(images.pHeroBullet);
+	SDL_FreeSurface(images.pEnemy1Bullet);
+	SDL_FreeSurface(images.pEnemy2Bullet);
 
-	if (game.status == PLAYING)
-	{
-		if (tick % HERO_FIRE_INTERVAL == 0) { game.hero.fire(); }
-		if (tick % ENEMY1_FIRE_INTERVAL == 0) { for (auto it = game.enemy1.begin(); it != game.enemy1.end(); ++it) { it->fire(); } }
-		if (tick % ENEMY2_FIRE_INTERVAL == 0) { for (auto it = game.enemy2.begin(); it != game.enemy2.end(); ++it) { it->fire(); } }
-	}
-	tick += interval;
-	return interval;
+	for (int i = 0; i < Hero::IMAGE_INDEX_MAX; i++) { SDL_FreeSurface(images.pHero[i]); }
+	for (int i = 0; i < Enemy0::IMAGE_INDEX_MAX; i++) { SDL_FreeSurface(images.pEnemy0[i]); }
+	for (int i = 0; i < Enemy1::IMAGE_INDEX_MAX; i++) { SDL_FreeSurface(images.pEnemy1[i]); }
+	for (int i = 0; i < Enemy2::IMAGE_INDEX_MAX; i++) { SDL_FreeSurface(images.pEnemy2[i]); }
 }
 
-Uint32 planeDownCallback(Uint32 interval, void* param)
+void MainGame::freeFonts()
 {
-	if (game.status == PLAYING)
-	{
-		game.hero.down();
-		for (auto it = game.enemy0.begin(); it != game.enemy0.end(); ++it) { it->down(); }
-		for (auto it = game.enemy1.begin(); it != game.enemy1.end(); ++it) { it->down(); }
-		for (auto it = game.enemy2.begin(); it != game.enemy2.end(); ++it) { it->down(); }
-	}
-	return interval;
-}
-
-Uint32 addAliveScoreCallback(Uint32 interval, void* param)
-{
-	if (game.hero.isAlive && game.status == PLAYING) { game.score += ALIVE_SCORE; }
-	return interval;
-}
-
-void MainGame::addTimer()
-{
-	timer.planeAnimate = SDL_AddTimer(PLANE_ANIMATE_INTERVAL, planeAnimateCallback, NULL);
-	timer.planeFire = SDL_AddTimer(PLANE_FIRE_INTERVAL, planeFireCallback, NULL);
-	timer.planeDown = SDL_AddTimer(PLANE_DOWN_INTERVAL, planeDownCallback, NULL);
-	timer.addAliveScore = SDL_AddTimer(ALIVE_SCORE_INTERVAL, addAliveScoreCallback, NULL);
-}
-
-void MainGame::freeImage()
-{
-	SDL_FreeFormat(image.format);
-	SDL_FreeSurface(image.background);
-	SDL_FreeSurface(image.heroBullet);
-	SDL_FreeSurface(image.enemy1Bullet);
-	SDL_FreeSurface(image.enemy2Bullet);
-
-	for (int i = 0; i < HERO_INDEX_MAX; i++) { SDL_FreeSurface(image.hero[i]); }
-	for (int i = 0; i < ENEMY0_INDEX_MAX; i++) { SDL_FreeSurface(image.enemy0[i]); }
-	for (int i = 0; i < ENEMY1_INDEX_MAX; i++) { SDL_FreeSurface(image.enemy1[i]); }
-	for (int i = 0; i < ENEMY2_INDEX_MAX; i++) { SDL_FreeSurface(image.enemy2[i]); }
-}
-
-void MainGame::freeFont()
-{
-	TTF_CloseFont(font.title);
-	TTF_CloseFont(font.info);
-}
-
-void MainGame::removeTimer()
-{
-	SDL_RemoveTimer(timer.planeAnimate);
-	SDL_RemoveTimer(timer.planeFire);
-	SDL_RemoveTimer(timer.planeDown);
-	SDL_RemoveTimer(timer.addAliveScore);
-}
-
-void MainGame::close()
-{
-	SDL_DestroyWindow(window);
-	removeTimer();
-	freeFont();
-	freeImage();
-	IMG_Quit();
-	TTF_Quit();
-	SDL_Quit();
+	TTF_CloseFont(fonts.pTitle);
+	TTF_CloseFont(fonts.pInfo);
 }
 
 void MainGame::initGame()
 {
+	status = START;
+	bestScore = 0;
+	backgroundScrollUpper = 0;
+}
+
+void MainGame::removeTimers()
+{
+	SDL_RemoveTimer(timers.addAliveScore);
+}
+
+void MainGame::closeWindow()
+{
+	SDL_DestroyWindow(pWindow);
+	SDL_FreeFormat(pFormat);
+}
+
+void MainGame::closeSystem()
+{
+	TTF_Quit();
+	IMG_Quit();
+	SDL_Quit();
+}
+
+void MainGame::addAliveScore()
+{
+	if (status == PLAYING && hero.getIsAlive())
+	{
+		score += ALIVE_SCORE;
+	}
+}
+
+void MainGame::restart()
+{
 	score = 0;
-	hero.init();
-	enemy0.clear();
-	enemy1.clear();
-	enemy2.clear();
-	heroBullet.clear();
-	enemy1Bullet.clear();
-	enemy2Bullet.clear();
+	hero.init(SCREEN_WIDTH, SCREEN_HEIGHT);
+	enemy0List.clear();
+	enemy1List.clear();
+	enemy2List.clear();
+	heroBulletList.clear();
+	enemy1BulletList.clear();
+	enemy2BulletList.clear();
 }
 
-void MainGame::addEnemy(list <Enemy>& enemy, EnemyData& data)
+void MainGame::addEnemy()
 {
-	if (score >= data.appendScore)
+	if (score >= Enemy0::APPEND_SCORE && rand() % RAND_MOD <= Enemy0::APPEND_PROBABILITY)
 	{
-		if (fmod(rand(), RAND_MOD) / RAND_MOD < data.probability)
-		{
-			int rangeMax = SCREEN_WIDTH - BORDER_X - data.width;
-			int rangeMin = BORDER_X;
-
-			enemy.push_back(Enemy({ rand() % (rangeMax - rangeMin) + rangeMin, -data.height }, data));
-		}
+		enemy0List.push_back(Enemy0(getRandomInRange(Enemy0::WIDTH), -Enemy0::HEIGHT));
+	}
+	if (score >= Enemy1::APPEND_SCORE && rand() % RAND_MOD <= Enemy1::APPEND_PROBABILITY)
+	{
+		enemy1List.push_back(Enemy1(getRandomInRange(Enemy1::WIDTH), -Enemy1::HEIGHT, &enemy1BulletList));
+	}
+	if (score >= Enemy2::APPEND_SCORE && rand() % RAND_MOD <= Enemy2::APPEND_PROBABILITY)
+	{
+		enemy2List.push_back(Enemy2(getRandomInRange(Enemy2::WIDTH), -Enemy2::HEIGHT, &enemy2BulletList));
 	}
 }
 
-void MainGame::updateEnemy(list <Enemy>& enemy, EnemyData& data)
-{
-	for (auto it = enemy.begin(); it != enemy.end();)
-	{
-		it->move();
-		it->miss();
-
-		(it->index == data.indexMax) ? (it = enemy.erase(it)) : (++it);
-	}
-}
-
-void MainGame::updateBullet(list <Bullet>& bullet)
-{
-	for (auto it = bullet.begin(); it != bullet.end();)
-	{
-		it->move();
-		it->miss();
-		it->hitHero();
-
-		(it->isAlive) ? (++it) : (it = bullet.erase(it));
-	}
-}
-
-void MainGame::update()
+void MainGame::updateBackground()
 {
 	if (status == PLAYING)
 	{
-		addEnemy(enemy0, enemy0Data);
-		addEnemy(enemy1, enemy1Data);
-		addEnemy(enemy2, enemy2Data);
-
-		hero.crash(enemy0, ENEMY0_SCORE);
-		hero.crash(enemy1, ENEMY1_SCORE);
-		hero.crash(enemy2, ENEMY2_SCORE);
-
-		updateEnemy(enemy0, enemy0Data);
-		updateEnemy(enemy1, enemy1Data);
-		updateEnemy(enemy2, enemy2Data);
-
-		updateBullet(enemy1Bullet);
-		updateBullet(enemy2Bullet);
-
-		for (auto it = heroBullet.begin(); it != heroBullet.end();)
+		if (backgroundScrollUpper == SCREEN_HEIGHT)
 		{
-			it->move();
-			it->miss();
-			it->hitEnemy(enemy0, ENEMY0_SCORE);
-			it->hitEnemy(enemy1, ENEMY1_SCORE);
-			it->hitEnemy(enemy2, ENEMY2_SCORE);
-
-			(it->isAlive) ? (++it) : (it = heroBullet.erase(it));
+			backgroundScrollUpper = 0;
 		}
+		backgroundScrollUpper += BACKGROUND_SCROLL_SPEED;
 	}
-	if (status == END && score > bestScore) { bestScore = score; }
 }
 
-void MainGame::events()
+void MainGame::updateHero()
 {
-	if (status == PLAYING && hero.isAlive) { hero.move(); }
-	if (hero.index == HERO_INDEX_MAX) { status = END; }
+	hero.fire(GAME_FPS);
+	hero.down(GAME_FPS);
+	hero.animateEffect(GAME_FPS);
 
-	while (SDL_PollEvent(&event))
+	if (hero.getIsDestroyed()) { status = OVER; }
+}
+
+void MainGame::updateEnemy()
+{
+	for (auto enemyIt = enemy0List.begin(); enemyIt != enemy0List.end();)
 	{
-		if (event.type == SDL_QUIT) { status = EXIT; }
-		if (event.type == SDL_MOUSEBUTTONDOWN)
+		enemyIt->move();
+		enemyIt->down(GAME_FPS);
+
+		if (enemyIt->getIsDestroyed() || enemyIt->getIsOutOfRange(SCREEN_HEIGHT))
 		{
-			if (status == END)
-			{
-				initGame();
-				status = PLAYING;
-			}
-			else if (status == START || status == PAUSE) { status = PLAYING; }
+			enemyIt = enemy0List.erase(enemyIt);
 		}
-		if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_p && status == PLAYING) { status = PAUSE; }
-		if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_b && status == PLAYING && hero.bombCount > 0)
-		{
-			hero.releaseBomb(enemy0, ENEMY0_SCORE);
-			hero.releaseBomb(enemy1, ENEMY1_SCORE);
-			hero.releaseBomb(enemy2, ENEMY2_SCORE);
-			hero.bombCount -= 1;
-		}
+		else { ++enemyIt; }
 	}
-}
-
-void MainGame::overflowBlit(SDL_Surface* surface, SDL_Rect& rect)
-{
-	static SDL_Rect selfRect;
-	static SDL_Rect desRect;
-
-	if (rect.y < 0)
+	for (auto enemyIt = enemy1List.begin(); enemyIt != enemy1List.end();)
 	{
-		selfRect = { 0, -rect.y, rect.w, rect.h };
-		desRect = { rect.x, 0, rect.w, rect.h + rect.y };
-		SDL_BlitSurface(surface, &selfRect, image.surface, &desRect);
+		enemyIt->move();
+		enemyIt->fire(GAME_FPS);
+		enemyIt->down(GAME_FPS);
+		
+		if (enemyIt->getIsDestroyed() || enemyIt->getIsOutOfRange(SCREEN_HEIGHT))
+		{
+			enemyIt = enemy1List.erase(enemyIt);
+		}
+		else { ++enemyIt; }
 	}
-	else { SDL_BlitSurface(surface, NULL, image.surface, &rect); }
+	for (auto enemyIt = enemy2List.begin(); enemyIt != enemy2List.end();)
+	{
+		enemyIt->move();
+		enemyIt->fire(GAME_FPS);
+		enemyIt->down(GAME_FPS);
+		enemyIt->animateEffect(GAME_FPS);
+		
+		if (enemyIt->getIsDestroyed() || enemyIt->getIsOutOfRange(SCREEN_HEIGHT))
+		{
+			enemyIt = enemy2List.erase(enemyIt);
+		}
+		else { ++enemyIt; }
+	}
 }
 
-void MainGame::displayText(const char* text, TTF_Font* font, Point pos, SDL_Color color)
+void MainGame::updateBullet()
 {
-	static SDL_Surface* textSurface;
-	static SDL_Rect textRect;
+	updateBulletTemplate(heroBulletList, SCREEN_HEIGHT);
+	updateBulletTemplate(enemy1BulletList, SCREEN_HEIGHT);
+	updateBulletTemplate(enemy2BulletList, SCREEN_HEIGHT);
+}
 
-	textSurface = TTF_RenderText_Blended(font, text, color);
-	textRect.x = pos.x;
-	textRect.y = pos.y;
+void MainGame::heroBulletHitDetection()
+{
+	heroBulletHitDetectionTemplate(heroBulletList, enemy0List, score);
+	heroBulletHitDetectionTemplate(heroBulletList, enemy1List, score);
+	heroBulletHitDetectionTemplate(heroBulletList, enemy2List, score);
+}
 
-	SDL_BlitSurface(textSurface, NULL, image.surface, &textRect);
-	SDL_FreeSurface(textSurface);
+void MainGame::enemyBulletHitDetection()
+{
+	enemyBulletHitDetectionTemplate(hero, enemy1BulletList);
+	enemyBulletHitDetectionTemplate(hero, enemy2BulletList);
+}
+
+void MainGame::heroCrashDetection()
+{
+	if (hero.getIsAlive())
+	{
+		heroCrashDetectionTemplate(hero, enemy0List, score);
+		heroCrashDetectionTemplate(hero, enemy1List, score);
+		heroCrashDetectionTemplate(hero, enemy2List, score);
+	}
+}
+
+void MainGame::displayText(const char* pText, TTF_Font* pFont, int x, int y, SDL_Color color)
+{
+	SDL_Surface* pTextSurface = TTF_RenderText_Blended(pFont, pText, color);
+	SDL_Rect textRect = { x, y };
+
+	SDL_BlitSurface(pTextSurface, NULL, pSurface, &textRect);
+	SDL_FreeSurface(pTextSurface);
+}
+
+void MainGame::displayOverflow(SDL_Surface* pTargetSurface, SDL_Rect& targetRect)
+{
+	if (targetRect.y < 0)
+	{
+		SDL_Rect selfRect = { 0, -targetRect.y, targetRect.w, targetRect.h };
+		SDL_Rect desRect = { targetRect.x, 0, targetRect.w, targetRect.h + targetRect.y };
+
+		SDL_BlitSurface(pTargetSurface, &selfRect, pSurface, &desRect);
+		return;
+	}
+	SDL_BlitSurface(pTargetSurface, NULL, pSurface, &targetRect);
 }
 
 void MainGame::displayBackground()
 {
-	static SDL_Rect selfRect;
-	static SDL_Rect desRect;
-	static int backgroundScrollPos;
+	SDL_Rect upperRect = { 0, backgroundScrollUpper - SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT };
+	SDL_Rect lowerRect = { 0, backgroundScrollUpper, SCREEN_WIDTH, SCREEN_HEIGHT };
 
-	if (status == PLAYING)
-	{
-		if (backgroundScrollPos == SCREEN_HEIGHT) { backgroundScrollPos = 0; }
-		backgroundScrollPos += BACKGROUND_SCROLL_SPEED;
-	}
-	selfRect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - backgroundScrollPos };
-	desRect = { 0, backgroundScrollPos, SCREEN_WIDTH, SCREEN_HEIGHT - backgroundScrollPos };
-	SDL_BlitSurface(image.background, &selfRect, image.surface, &desRect);
-
-	selfRect = { 0, SCREEN_HEIGHT - backgroundScrollPos, SCREEN_WIDTH, backgroundScrollPos };
-	desRect = { 0, 0, SCREEN_WIDTH, backgroundScrollPos };
-	SDL_BlitSurface(image.background, &selfRect, image.surface, &desRect);
+	displayOverflow(images.pBackground, upperRect);
+	displayOverflow(images.pBackground, lowerRect);
 }
 
 void MainGame::displayPlane()
 {
 	if (status == PLAYING)
 	{
-		hero.display();
-		for (auto it = enemy0.begin(); it != enemy0.end(); ++it) { it->display(); }
-		for (auto it = enemy1.begin(); it != enemy1.end(); ++it) { it->display(); }
-		for (auto it = enemy2.begin(); it != enemy2.end(); ++it) { it->display(); }
-		for (auto it = heroBullet.begin(); it != heroBullet.end(); ++it) { it->display(); }
-		for (auto it = enemy1Bullet.begin(); it != enemy1Bullet.end(); ++it) { it->display(); }
-		for (auto it = enemy2Bullet.begin(); it != enemy2Bullet.end(); ++it) { it->display(); }
+		if (!hero.getIsDestroyed())
+		{
+			displayOverflow(images.pHero[hero.getImageIndex()], hero);
+		}
+		displayEnemyTemplate(this, enemy0List, images.pEnemy0);
+		displayEnemyTemplate(this, enemy1List, images.pEnemy1);
+		displayEnemyTemplate(this, enemy2List, images.pEnemy2);
+	}
+}
+
+void MainGame::displayBullet()
+{
+	if (status == PLAYING)
+	{
+		displayBulletTemplate(this, heroBulletList, images.pHeroBullet);
+		displayBulletTemplate(this, enemy1BulletList, images.pEnemy1Bullet);
+		displayBulletTemplate(this, enemy2BulletList, images.pEnemy2Bullet);
 	}
 }
 
 void MainGame::displayInfo()
 {
-	static char text[INFO_MAX_LEN];
+	static char text[INFO_MAX_LENGTH];
 
 	if (status == START)
 	{
-		displayText("Welcome to PlaneWar", font.title, { SCREEN_WIDTH / 2 - TITLE_WELCOME_LENGTH, TITLE_POSITION }, color.black);
-		displayText("Click anywhere to START...", font.info, { SCREEN_WIDTH / 2 - INFO_LENGTH, INFO_POSITION }, color.black);
+		displayText("Welcome to PlaneWar", fonts.pTitle, (SCREEN_WIDTH - TITLE_WELCOME_WIDTH) / 2, TITLE_UPPER, BLACK);
+		displayText("Click anywhere to START...", fonts.pInfo, (SCREEN_WIDTH - INFO_WIDTH) / 2, INFO_UPPER, BLACK);
 	}
 	else if (status == PLAYING)
 	{
-		SDL_snprintf(text, INFO_MAX_LEN, "score: %d", score);
-		displayText(text, font.info, { BORDER_TEXT, SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE) }, color.black);
-		SDL_snprintf(text, INFO_MAX_LEN, "HP: %d%%", hero.health);
-		displayText(text, font.info, { SCREEN_WIDTH - (HP_LENGTH + BORDER_TEXT), SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE) }, ((hero.health > HERO_HP_ALERT) ? color.black : color.red));
-		SDL_snprintf(text, INFO_MAX_LEN, "BOMB: %d", hero.bombCount);
-		displayText(text, font.info, { BORDER_TEXT, BORDER_TEXT }, color.black);
+		SDL_snprintf(text, INFO_MAX_LENGTH, "score: %d", score);
+		displayText(text, fonts.pInfo, BORDER_TEXT, SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE), BLACK);
+
+		int textX = SCREEN_WIDTH - (HEALTH_WIDTH + BORDER_TEXT);
+		int textY = SCREEN_HEIGHT - (BORDER_TEXT + INFO_FONT_SIZE);
+
+		SDL_snprintf(text, INFO_MAX_LENGTH, "HP: %d%%", hero.getHealth());
+		displayText(text, fonts.pInfo, textX, textY, ((hero.getHealth() > Hero::HEALTH_ALERT) ? BLACK : RED));
+
+		SDL_snprintf(text, INFO_MAX_LENGTH, "BOMB: %d", hero.getBombCount());
+		displayText(text, fonts.pInfo, BORDER_TEXT, BORDER_TEXT, BLACK);
 	}
 	else if (status == PAUSE)
 	{
-		displayText("PAUSE", font.title, { SCREEN_WIDTH / 2 - TITLE_PAUSE_LENGTH, TITLE_POSITION }, color.black);
-		displayText("Click anywhere to RESUME...", font.info, { SCREEN_WIDTH / 2 - INFO_LENGTH, INFO_POSITION }, color.black);
+		displayText("PAUSE", fonts.pTitle, (SCREEN_WIDTH - TITLE_PAUSE_WIDTH) / 2, TITLE_UPPER, BLACK);
+		displayText("Click anywhere to RESUME...", fonts.pInfo, (SCREEN_WIDTH - INFO_WIDTH) / 2, INFO_UPPER, BLACK);
 	}
-	else if (status == END)
+	else if (status == OVER)
 	{
-		SDL_snprintf(text, INFO_MAX_LEN, "Your score: %d", score);
-		displayText(text, font.info, { SCREEN_WIDTH / 2 - SCORE_LENGTH, SCORE_POSITION }, color.black);
-		SDL_snprintf(text, INFO_MAX_LEN, "Best score: %d", bestScore);
-		displayText(text, font.info, { SCREEN_WIDTH / 2 - SCORE_LENGTH, BEST_SCORE_POSITION }, color.black);
-		displayText("Gameover!", font.title, { SCREEN_WIDTH / 2 - TITLE_OVER_LENGTH, TITLE_POSITION }, color.black);
-		displayText("Click anywhere to RESTART...", font.info, { SCREEN_WIDTH / 2 - INFO_LENGTH, INFO_POSITION }, color.black);
+		SDL_snprintf(text, INFO_MAX_LENGTH, "Your score: %d", score);
+		displayText(text, fonts.pInfo, (SCREEN_WIDTH - SCORE_WIDTH) / 2, SCORE_UPPER, BLACK);
+
+		SDL_snprintf(text, INFO_MAX_LENGTH, "Best score: %d", bestScore);
+		displayText(text, fonts.pInfo, (SCREEN_WIDTH - SCORE_WIDTH) / 2, BEST_SCORE_UPPER, BLACK);
+
+		displayText("Gameover!", fonts.pTitle, (SCREEN_WIDTH - TITLE_OVER_WIDTH) / 2, TITLE_UPPER, BLACK);
+		displayText("Click anywhere to RESTART...", fonts.pInfo, (SCREEN_WIDTH - INFO_WIDTH) / 2, INFO_UPPER, BLACK);
+	}
+}
+
+MainGame::MainGame() : hero(&heroBulletList)
+{
+	srand((unsigned)time(NULL));
+	getVersion();
+	initSystem();
+	initWindow();
+	initGame();
+	loadImages();
+	loadFonts();
+	addTimers();
+	restart();
+}
+
+MainGame::~MainGame()
+{
+	freeImages();
+	freeFonts();
+	removeTimers();
+	closeWindow();
+	closeSystem();
+}
+
+bool MainGame::isRunning()
+{
+	return status != EXIT;
+}
+
+void MainGame::update()
+{
+	if (status == OVER && score > bestScore)
+	{
+		bestScore = score;
+	}
+	else if (status == PLAYING)
+	{
+		addEnemy();
+		updateBackground();
+		updateHero();
+		updateEnemy();
+		updateBullet();
+		heroBulletHitDetection();
+		enemyBulletHitDetection();
+		heroCrashDetection();
+	}
+}
+
+void MainGame::events()
+{
+	if (status == PLAYING && hero.getIsAlive())
+	{
+		if (pKeyStatus[SDL_SCANCODE_W] && hero.getUpper() >= BORDER_Y) { hero.move(UP); }
+		if (pKeyStatus[SDL_SCANCODE_S] && hero.getLower() <= SCREEN_HEIGHT - BORDER_Y) { hero.move(DOWN); }
+		if (pKeyStatus[SDL_SCANCODE_A] && hero.getLeft() >= BORDER_X) { hero.move(LEFT); }
+		if (pKeyStatus[SDL_SCANCODE_D] && hero.getRight() <= SCREEN_WIDTH - BORDER_X) { hero.move(RIGHT); }
+	}
+	while (SDL_PollEvent(&event))
+	{
+		if (event.type == SDL_QUIT) { status = EXIT; }
+		if (event.type == SDL_MOUSEBUTTONDOWN && isRunning())
+		{
+			if (status == OVER) { restart(); }
+			status = PLAYING;
+		}
+		if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_p && status == PLAYING) { status = PAUSE; }
+		if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_SPACE && status == PLAYING && hero.getBombCount() > 0)
+		{
+			hero.releaseBomb();
+
+			heroReleaseBomeTemplate(enemy0List, score);
+			heroReleaseBomeTemplate(enemy1List, score);
+			heroReleaseBomeTemplate(enemy2List, score);
+		}
 	}
 }
 
@@ -367,6 +429,15 @@ void MainGame::display()
 {
 	displayBackground();
 	displayPlane();
+	displayBullet();
 	displayInfo();
-	SDL_UpdateWindowSurface(window);
+	SDL_UpdateWindowSurface(pWindow);
+}
+
+void MainGame::delay(Uint32 startTick, Uint32 endTick)
+{
+	int deltaTick = endTick - startTick;
+	int delayTick = 1000 / GAME_FPS - deltaTick;
+
+	SDL_Delay((delayTick > 0) ? delayTick : 0);
 }

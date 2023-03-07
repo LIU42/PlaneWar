@@ -1,233 +1,247 @@
-#include "planewar.h"
+#include "plane.h"
 
-void Plane::animate()
+Plane::Plane(int x, int y, int width, int height, int imageIndexMax) : SDL_Rect({ x, y, width, height })
 {
-	if (!isHit)
-	{
-		switch (index)
-		{
-			case APPEARANCE1: index = APPEARANCE2; break;
-			case APPEARANCE2: index = APPEARANCE1; break;
-		}
-	}
+	this->imageIndex = 0;
+	this->imageIndexMax = imageIndexMax;
+	this->downWaitTime = 0;
+	this->isAlive = true;
 }
 
-void Plane::move()
+void Plane::down(int gameFPS)
 {
-	rect.y += speed;
-}
-
-void Plane::miss()
-{
-	if (rect.y > SCREEN_HEIGHT)
-	{
-		isAlive = false;
-		index = indexMax;
-	}
-}
-
-void Plane::down()
-{
-	if (health <= 0 || !isAlive)
+	if (health <= 0)
 	{
 		isAlive = false;
 		health = 0;
 
-		if (index < indexMax) { index += 1; }
+		if (downWaitTime >= DOWN_INTERVAL && imageIndex < imageIndexMax)
+		{
+			imageIndex += 1;
+			downWaitTime = 0;
+		}
+		downWaitTime += 1000 / gameFPS;
 	}
 }
 
-void Hero::init()
+void Plane::hit(int damage)
 {
-	rect = { SCREEN_WIDTH / 2 - HERO_WIDTH / 2, SCREEN_HEIGHT - HERO_HEIGHT - HERO_INIT_POSITION, HERO_WIDTH, HERO_HEIGHT };
-	health = HERO_HP;
+	health -= damage;
+}
+
+bool Plane::getIsAlive()
+{
+	return isAlive;
+}
+
+bool Plane::getIsDestroyed()
+{
+	return imageIndex >= imageIndexMax;
+}
+
+bool Plane::getIsOutOfRange(int screenHeight)
+{
+	return SDL_Rect::y > screenHeight;
+}
+
+int Plane::getHealth()
+{
+	return health;
+}
+
+int Plane::getCenterX()
+{
+	return SDL_Rect::x + SDL_Rect::w / 2;
+}
+
+int Plane::getCenterY()
+{
+	return SDL_Rect::y + SDL_Rect::h / 2;
+}
+
+int Plane::getImageIndex()
+{
+	return imageIndex;
+}
+
+Hero::Hero(HeroBulletList* pBulletList) : Plane(0, 0, WIDTH, HEIGHT, IMAGE_INDEX_MAX)
+{
+	this->speed = SPEED;
+	this->pBulletList = pBulletList;
+}
+
+void Hero::init(int screenWidth, int screenHeight)
+{
+	SDL_Rect::x = (screenWidth - WIDTH) / 2;
+	SDL_Rect::y = screenHeight - HEIGHT - INIT_BOTTOM;
+
 	isAlive = true;
-	isHit = false;
-	speed = HERO_SPEED;
-	index = 0;
-	indexMax = HERO_INDEX_MAX;
-	bombCount = HERO_BOMB_INIT_COUNT;
+	health = HEALTH;
+	fireWaitTime = 0;
+	animateWaitTime = 0;
+	bombCount = BOMB_INIT_COUNT;
+	imageIndex = 0;
 }
 
-void Hero::move()
+void Hero::move(HeroMoveDirect direct)
 {
-	if (game.keyStatus[SDL_SCANCODE_W] && rect.y >= BORDER_Y) { rect.y -= speed; }
-	if (game.keyStatus[SDL_SCANCODE_S] && rect.y <= SCREEN_HEIGHT - BORDER_Y - rect.h) { rect.y += speed; }
-	if (game.keyStatus[SDL_SCANCODE_A] && rect.x >= BORDER_X) { rect.x -= speed; }
-	if (game.keyStatus[SDL_SCANCODE_D] && rect.x <= SCREEN_WIDTH - BORDER_X - rect.w) { rect.x += speed; }
-}
-
-void Hero::fire()
-{
-	if (isAlive)
+	switch (direct)
 	{
-		int x = rect.x + rect.w / 2 - HERO_BULLET_WIDTH / 2 + 1;
-		int y = rect.y - HERO_BULLET_HEIGHT;
-
-		game.heroBullet.push_back(Bullet({ x, y }, game.heroBulletData));
+		case UP: SDL_Rect::y -= SPEED; break;
+		case DOWN: SDL_Rect::y += SPEED; break;
+		case LEFT: SDL_Rect::x -= SPEED; break;
+		case RIGHT: SDL_Rect::x += SPEED; break;
 	}
 }
 
-void Hero::releaseBomb(list <Enemy>& enemy, int score)
+void Hero::fire(int gameFPS)
 {
-	for (auto it = enemy.begin(); it != enemy.end(); ++it)
+	if (fireWaitTime >= FIRE_INTERVAL && isAlive)
 	{
-		it->isAlive = false;
-		game.score += score;
+		int x = getCenterX() - HeroBullet::WIDTH / 2 + 1;
+		int y = getCenterY() - HEIGHT / 2 - HeroBullet::HEIGHT;
+
+		pBulletList->push_back(HeroBullet(x, y));
+		fireWaitTime = 0;
+	}
+	fireWaitTime += 1000 / gameFPS;
+}
+
+void Hero::releaseBomb()
+{
+	if (bombCount > 0 && isAlive)
+	{
+		bombCount -= 1;
 	}
 }
 
-void Hero::crash(list <Enemy>& enemy, int score)
+void Hero::animateEffect(int gameFPS)
 {
-	if (isAlive)
+	if (animateWaitTime >= ANIMATE_INTERVAL && isAlive)
 	{
-		for (auto it = enemy.begin(); it != enemy.end(); ++it)
+		switch (imageIndex)
 		{
-			int distanceX = SDL_abs((rect.x + rect.w / 2) - (it->rect.x + it->rect.w / 2)) + CRASH_DIFF;
-			int distanceY = SDL_abs((rect.y + rect.h / 2) - (it->rect.y + it->rect.h / 2)) + CRASH_DIFF;
-
-			if (distanceX <= (HERO_WIDTH + it->rect.w) / 2 && distanceY <= (HERO_HEIGHT + it->rect.h) / 2 && it->isAlive)
-			{
-				isAlive = false;
-				it->isAlive = false;
-				game.score += score;
-			}
+			case APPEARANCE1: imageIndex = APPEARANCE2; break;
+			case APPEARANCE2: imageIndex = APPEARANCE1; break;
 		}
+		animateWaitTime = 0;
 	}
+	animateWaitTime += 1000 / gameFPS;
 }
 
-void Hero::display()
+int Hero::getBombCount()
 {
-	if (index < indexMax)
+	return bombCount;
+}
+
+int Hero::getUpper()
+{
+	return SDL_Rect::y;
+}
+
+int Hero::getLower()
+{
+	return SDL_Rect::y + Hero::HEALTH;
+}
+
+int Hero::getLeft()
+{
+	return SDL_Rect::x;
+}
+
+int Hero::getRight()
+{
+	return SDL_Rect::x + Hero::WIDTH;
+}
+
+Enemy::Enemy(int x, int y, int width, int height, int imageIndexMax) : Plane(x, y, width, height, imageIndexMax) {}
+
+void Enemy::move()
+{
+	SDL_Rect::y += speed;
+}
+
+Enemy0::Enemy0(int x, int y) : Enemy(x, y, WIDTH, HEIGHT, IMAGE_INDEX_MAX)
+{
+	this->speed = SPEED;
+	this->health = HEALTH;
+}
+
+Enemy1::Enemy1(int x, int y, Enemy1BulletList* pBulletList) : Enemy(x, y, WIDTH, HEIGHT, IMAGE_INDEX_MAX)
+{
+	this->pBulletList = pBulletList;
+	this->speed = SPEED;
+	this->health = HEALTH;
+	this->fireWaitTime = 0;
+	this->isHurt = false;
+}
+
+void Enemy1::fire(int gameFPS)
+{
+	if (fireWaitTime >= FIRE_INTERVAL && isAlive)
 	{
-		SDL_BlitSurface(game.image.hero[index], NULL, game.image.surface, &rect);
+		int x = getCenterX() - Enemy1Bullet::WIDTH / 2 + 1;
+		int y = getCenterY() + HEIGHT / 2;
+
+		pBulletList->push_back(Enemy1Bullet(x, y));
+		fireWaitTime = 0;
 	}
+	fireWaitTime += 1000 / gameFPS;
 }
 
-Enemy::Enemy(Point pos, EnemyData& data)
+void Enemy1::down(int gameFPS)
 {
-	rect = { pos.x, pos.y, data.width, data.height };
-	identity = data.identity;
-	health = data.health;
-	index = 0;
-	speed = data.speed;
-	indexMax = data.indexMax;
-	isAlive = true;
-	isHit = false;
-}
-
-void Enemy::down()
-{
-	switch (identity)
+	if (health <= HURT_HEALTH && isAlive)
 	{
-		case ENEMY1_ID: if (health <= ENEMY1_HP / 2 && isAlive) { isHit = true; index = ENEMY1_INDEX_HIT; } break;
-		case ENEMY2_ID: if (health <= ENEMY2_HP / 2 && isAlive) { isHit = true; index = ENEMY2_INDEX_HIT; } break;
+		isHurt = true;
+		imageIndex = IMAGE_INDEX_HURT;
 	}
-	Plane::down();
+	Plane::down(gameFPS);
 }
 
-void Enemy::fire()
+Enemy2::Enemy2(int x, int y, Enemy2BulletList* pBulletList) : Enemy(x, y, WIDTH, HEIGHT, IMAGE_INDEX_MAX)
 {
-	if (isAlive)
+	this->pBulletList = pBulletList;
+	this->speed = SPEED;
+	this->health = HEALTH;
+	this->fireWaitTime = 0;
+	this->animateWaitTime = 0;
+	this->isHurt = false;
+}
+
+void Enemy2::fire(int gameFPS)
+{
+	if (fireWaitTime >= FIRE_INTERVAL && isAlive && !isHurt)
 	{
-		if (identity == ENEMY1_ID)
+		int x = getCenterX() - Enemy2Bullet::WIDTH / 2 + 1;
+		int y = getCenterY() + HEIGHT / 2;
+
+		pBulletList->push_back(Enemy2Bullet(x, y));
+		fireWaitTime = 0;
+	}
+	fireWaitTime += 1000 / gameFPS;
+}
+
+void Enemy2::down(int gameFPS)
+{
+	if (health <= HURT_HEALTH && isAlive)
+	{
+		isHurt = true;
+		imageIndex = IMAGE_INDEX_HURT;
+	}
+	Plane::down(gameFPS);
+}
+
+void Enemy2::animateEffect(int gameFPS)
+{
+	if (animateWaitTime >= ANIMATE_INTERVAL && isAlive && !isHurt)
+	{
+		switch (imageIndex)
 		{
-			int x = rect.x + rect.w / 2 - ENEMY1_BULLET_WIDTH / 2 + 1;
-			int y = rect.y + rect.h;
-
-			game.enemy1Bullet.push_back(Bullet({ x, y }, game.enemy1BulletData));
+			case APPEARANCE1: imageIndex = APPEARANCE2; break;
+			case APPEARANCE2: imageIndex = APPEARANCE1; break;
 		}
-		else if (identity == ENEMY2_ID && !isHit)
-		{
-			int x = rect.x + rect.w / 2 - ENEMY2_BULLET_WIDTH / 2 + 1;
-			int y = rect.y + rect.h;
-
-			game.enemy2Bullet.push_back(Bullet({ x, y }, game.enemy2BulletData));
-		}
+		animateWaitTime = 0;
 	}
-}
-
-void Enemy::display()
-{
-	static SDL_Surface* surface;
-
-	if (index < indexMax)
-	{
-		switch (identity)
-		{
-			case ENEMY0_ID: surface = game.image.enemy0[index]; break;
-			case ENEMY1_ID: surface = game.image.enemy1[index]; break;
-			case ENEMY2_ID: surface = game.image.enemy2[index]; break;
-		}
-		game.overflowBlit(surface, rect);
-	}
-}
-
-Bullet::Bullet(Point pos, BulletData& data)
-{
-	rect = { pos.x, pos.y, data.width, data.height };
-	identity = data.identity;
-	speed = data.speed;
-	damage = data.damage;
-	isAlive = true;
-}
-
-void Bullet::move()
-{
-	if (identity == HERO_BULLET_ID)
-	{
-		rect.y -= speed;
-	}
-	else { rect.y += speed; }
-}
-
-void Bullet::miss()
-{
-	if (identity == HERO_BULLET_ID && rect.y <= -rect.h)
-	{
-		isAlive = false;
-	}
-	else if (rect.y > SCREEN_HEIGHT) { isAlive = false; }
-}
-
-void Bullet::hitHero()
-{
-	int distanceX = SDL_abs((rect.x + rect.w / 2) - (game.hero.rect.x + game.hero.rect.w / 2)) + ENEMY_HIT_DIFF;
-	int distanceY = SDL_abs((rect.y + rect.h / 2) - (game.hero.rect.y + game.hero.rect.h / 2)) + ENEMY_HIT_DIFF;
-
-	if (distanceX <= HERO_WIDTH / 2 && distanceY <= HERO_HEIGHT / 2 && game.hero.health > 0)
-	{
-		game.hero.health -= damage;
-		isAlive = false;
-	}
-}
-
-void Bullet::hitEnemy(list <Enemy>& enemy, int score)
-{
-	for (auto it = enemy.begin(); it != enemy.end(); ++it)
-	{
-		int distanceX = SDL_abs((rect.x + rect.w / 2) - (it->rect.x + it->rect.w / 2)) + HERO_HIT_DIFF;
-		int distanceY = SDL_abs((rect.y + rect.h / 2) - (it->rect.y + it->rect.h / 2)) + HERO_HIT_DIFF;
-
-		if (distanceX <= it->rect.w / 2 && distanceY <= it->rect.h / 2 && it->health > 0)
-		{
-			it->health -= damage;
-			isAlive = false;
-
-			if (it->health <= 0) { game.score += score; }
-		}
-	}
-}
-
-void Bullet::display()
-{
-	static SDL_Surface* surface;
-
-	switch (identity)
-	{
-		case HERO_BULLET_ID: surface = game.image.heroBullet; break;
-		case ENEMY1_BULLET_ID: surface = game.image.enemy1Bullet; break;
-		case ENEMY2_BULLET_ID: surface = game.image.enemy2Bullet; break;
-	}
-	game.overflowBlit(surface, rect);
+	animateWaitTime += 1000 / gameFPS;
 }
