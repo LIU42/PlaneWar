@@ -66,8 +66,8 @@ class Enemy2Bullet : public Bullet
 		Enemy2Bullet(int, int);
 };
 
-typedef list <HeroBullet> HeroBulletList;
-typedef list <Enemy1Bullet> Enemy1BulletList;
-typedef list <Enemy2Bullet> Enemy2BulletList;
+typedef list<HeroBullet> HeroBulletList;
+typedef list<Enemy1Bullet> Enemy1BulletList;
+typedef list<Enemy2Bullet> Enemy2BulletList;
 
 #endif

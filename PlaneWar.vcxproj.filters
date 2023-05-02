@@ -27,9 +27,6 @@
     <ClInclude Include="Sources\plane.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\template.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Sources\resource.rc">

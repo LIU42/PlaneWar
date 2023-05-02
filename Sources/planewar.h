@@ -112,9 +112,6 @@ class MainGame
 		int backgroundScrollUpper;
 
 	private:
-		static Uint32 addAliveScoreCallback(Uint32, void*);
-
-	private:
 		SDL_RWops* getResource(LPCWSTR, LPCWSTR);
 		SDL_Surface* loadSurface(Uint32);
 
@@ -146,9 +143,9 @@ class MainGame
 		void updateBullet();
 
 	private:
-		void heroBulletHitDetection();
-		void enemyBulletHitDetection();
-		void heroCrashDetection();
+		void heroBulletHitDetect();
+		void enemyBulletHitDetect();
+		void heroCrashDetect();
 
 	private:
 		void displayText(const char*, TTF_Font*, int, int, SDL_Color);

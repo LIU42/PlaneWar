@@ -178,8 +178,8 @@ class Enemy2 : public Enemy
 		void animateEffect(int);
 };
 
-typedef list <Enemy0> Enemy0List;
-typedef list <Enemy1> Enemy1List;
-typedef list <Enemy2> Enemy2List;
+typedef list<Enemy0> Enemy0List;
+typedef list<Enemy1> Enemy1List;
+typedef list<Enemy2> Enemy2List;
 
 #endif

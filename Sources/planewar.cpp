@@ -1,5 +1,4 @@
 #include "planewar.h"
-#include "template.h"
 
 SDL_RWops* MainGame::getResource(LPCWSTR name, LPCWSTR type)
 {
@@ -21,18 +20,18 @@ SDL_Surface* MainGame::loadSurface(Uint32 id)
 	return pConvertedSurface;
 }
 
-Uint32 MainGame::addAliveScoreCallback(Uint32 interval, void* param)
+Uint32 addAliveScoreCallback(Uint32 interval, void* pParam)
 {
-	((MainGame*)param)->addAliveScore();
+	((MainGame*)pParam)->addAliveScore();
 	return interval;
 }
 
 int MainGame::getRandomInRange(int enemyWidth)
 {
-	int max = SCREEN_WIDTH - BORDER_X - enemyWidth;
-	int min = BORDER_X;
+	int maxValue = SCREEN_WIDTH - BORDER_X - enemyWidth;
+	int minValue = BORDER_X;
 
-	return rand() % (max - min) + min;
+	return rand() % (maxValue - minValue) + minValue;
 }
 
 void MainGame::getVersion()
@@ -186,41 +185,143 @@ void MainGame::updateHero()
 
 void MainGame::updateEnemy()
 {
-	for (auto enemyIt = enemy0List.begin(); enemyIt != enemy0List.end();)
+	for (auto enemyIter = enemy0List.begin(); enemyIter != enemy0List.end();)
 	{
-		enemyIt->move();
-		enemyIt->down(GAME_FPS);
+		enemyIter->move();
+		enemyIter->down(GAME_FPS);
 
-		if (enemyIt->getIsDestroyed() || enemyIt->getIsOutOfRange(SCREEN_HEIGHT))
+		if (enemyIter->getIsDestroyed() || enemyIter->getIsOutOfRange(SCREEN_HEIGHT))
 		{
-			enemyIt = enemy0List.erase(enemyIt);
+			enemyIter = enemy0List.erase(enemyIter);
 		}
-		else { ++enemyIt; }
+		else { ++enemyIter; }
 	}
-	for (auto enemyIt = enemy1List.begin(); enemyIt != enemy1List.end();)
+	for (auto enemyIter = enemy1List.begin(); enemyIter != enemy1List.end();)
 	{
-		enemyIt->move();
-		enemyIt->fire(GAME_FPS);
-		enemyIt->down(GAME_FPS);
+		enemyIter->move();
+		enemyIter->fire(GAME_FPS);
+		enemyIter->down(GAME_FPS);
 		
-		if (enemyIt->getIsDestroyed() || enemyIt->getIsOutOfRange(SCREEN_HEIGHT))
+		if (enemyIter->getIsDestroyed() || enemyIter->getIsOutOfRange(SCREEN_HEIGHT))
 		{
-			enemyIt = enemy1List.erase(enemyIt);
+			enemyIter = enemy1List.erase(enemyIter);
 		}
-		else { ++enemyIt; }
+		else { ++enemyIter; }
 	}
-	for (auto enemyIt = enemy2List.begin(); enemyIt != enemy2List.end();)
+	for (auto enemyIter = enemy2List.begin(); enemyIter != enemy2List.end();)
 	{
-		enemyIt->move();
-		enemyIt->fire(GAME_FPS);
-		enemyIt->down(GAME_FPS);
-		enemyIt->animateEffect(GAME_FPS);
+		enemyIter->move();
+		enemyIter->fire(GAME_FPS);
+		enemyIter->down(GAME_FPS);
+		enemyIter->animateEffect(GAME_FPS);
 		
-		if (enemyIt->getIsDestroyed() || enemyIt->getIsOutOfRange(SCREEN_HEIGHT))
+		if (enemyIter->getIsDestroyed() || enemyIter->getIsOutOfRange(SCREEN_HEIGHT))
 		{
-			enemyIt = enemy2List.erase(enemyIt);
+			enemyIter = enemy2List.erase(enemyIter);
 		}
-		else { ++enemyIt; }
+		else { ++enemyIter; }
+	}
+}
+
+template<class EnemyList> void heroBomeAttackTemplate(EnemyList& enemyList, int& score)
+{
+	for (auto enemyIter = enemyList.begin(); enemyIter != enemyList.end(); ++enemyIter)
+	{
+		enemyIter->hit(enemyIter->HEALTH);
+		score += enemyIter->DESTROY_SCORE;
+	}
+}
+
+template<class BulletList> void updateBulletTemplate(BulletList& bulletList, int screenHeight)
+{
+	for (auto bulletIter = bulletList.begin(); bulletIter != bulletList.end();)
+	{
+		bulletIter->move();
+
+		if (!bulletIter->getIsAlive() || bulletIter->getIsOutOfRange(screenHeight))
+		{
+			bulletIter = bulletList.erase(bulletIter);
+		}
+		else { ++bulletIter; }
+	}
+}
+
+template<class EnemyList> void heroBulletHitDetectTemplate(HeroBulletList& heroBulletList, EnemyList& enemyList, int& score)
+{
+	for (auto bulletIter = heroBulletList.begin(); bulletIter != heroBulletList.end(); ++bulletIter)
+	{
+		for (auto enemyIter = enemyList.begin(); enemyIter != enemyList.end(); ++enemyIter)
+		{
+			int distanceX = SDL_abs(bulletIter->getCenterX() - enemyIter->getCenterX());
+			int distanceY = SDL_abs(bulletIter->getCenterY() - enemyIter->getCenterY());
+
+			int rangeX = enemyIter->WIDTH / 2 - HeroBullet::HIT_DIFF;
+			int rangeY = enemyIter->HEIGHT / 2 - HeroBullet::HIT_DIFF;
+
+			if (distanceX <= rangeX && distanceY <= rangeY && enemyIter->getIsAlive())
+			{
+				enemyIter->hit(HeroBullet::DAMAGE);
+				bulletIter->hit();
+
+				if (enemyIter->getHealth() <= 0) { score += enemyIter->DESTROY_SCORE; }
+			}
+		}
+	}
+}
+
+template<class EnemyBulletList> void enemyBulletHitDetectTemplate(Hero& hero, EnemyBulletList& enemyBulletList)
+{
+	for (auto bulletIter = enemyBulletList.begin(); bulletIter != enemyBulletList.end(); ++bulletIter)
+	{
+		int distanceX = SDL_abs(bulletIter->getCenterX() - hero.getCenterX());
+		int distanceY = SDL_abs(bulletIter->getCenterY() - hero.getCenterY());
+
+		int rangeX = Hero::WIDTH / 2 - bulletIter->HIT_DIFF;
+		int rangeY = Hero::HEIGHT / 2 - bulletIter->HIT_DIFF;
+
+		if (distanceX <= Hero::WIDTH / 2 && distanceY <= Hero::HEIGHT / 2 && hero.getIsAlive())
+		{
+			hero.hit(bulletIter->DAMAGE);
+			bulletIter->hit();
+		}
+	}
+}
+
+template<class EnemyList> void heroCrashDetectionTemplate(Hero& hero, EnemyList& enemyList, int& score)
+{
+	for (auto enemyIter = enemyList.begin(); enemyIter != enemyList.end(); ++enemyIter)
+	{
+		int distanceX = SDL_abs(hero.getCenterX() - enemyIter->getCenterX());
+		int distanceY = SDL_abs(hero.getCenterY() - enemyIter->getCenterY());
+
+		int rangeX = (Hero::WIDTH + enemyIter->WIDTH) / 2 - Hero::CRASH_DIFF;
+		int rangeY = (Hero::HEIGHT + enemyIter->HEIGHT) / 2 - Hero::CRASH_DIFF;
+
+		if (distanceX <= rangeX && distanceY <= rangeY && enemyIter->getIsAlive())
+		{
+			hero.hit(Hero::HEALTH);
+			enemyIter->hit(enemyIter->HEALTH);
+			score += enemyIter->DESTROY_SCORE;
+		}
+	}
+}
+
+template<class EnemyList> void displayEnemyTemplate(MainGame* pGame, EnemyList& enemyList, SDL_Surface* pEnemySurfaceList[])
+{
+	for (auto enemyIter = enemyList.begin(); enemyIter != enemyList.end(); ++enemyIter)
+	{
+		if (!enemyIter->getIsDestroyed())
+		{
+			pGame->displayOverflow(pEnemySurfaceList[enemyIter->getImageIndex()], *enemyIter);
+		}
+	}
+}
+
+template<class BulletList> void displayBulletTemplate(MainGame* pGame, BulletList& bulletList, SDL_Surface* pBulletSurface)
+{
+	for (auto bulletIter = bulletList.begin(); bulletIter != bulletList.end(); ++bulletIter)
+	{
+		pGame->displayOverflow(pBulletSurface, *bulletIter);
 	}
 }
 
@@ -231,20 +332,20 @@ void MainGame::updateBullet()
 	updateBulletTemplate(enemy2BulletList, SCREEN_HEIGHT);
 }
 
-void MainGame::heroBulletHitDetection()
+void MainGame::heroBulletHitDetect()
 {
-	heroBulletHitDetectionTemplate(heroBulletList, enemy0List, score);
-	heroBulletHitDetectionTemplate(heroBulletList, enemy1List, score);
-	heroBulletHitDetectionTemplate(heroBulletList, enemy2List, score);
+	heroBulletHitDetectTemplate(heroBulletList, enemy0List, score);
+	heroBulletHitDetectTemplate(heroBulletList, enemy1List, score);
+	heroBulletHitDetectTemplate(heroBulletList, enemy2List, score);
 }
 
-void MainGame::enemyBulletHitDetection()
+void MainGame::enemyBulletHitDetect()
 {
-	enemyBulletHitDetectionTemplate(hero, enemy1BulletList);
-	enemyBulletHitDetectionTemplate(hero, enemy2BulletList);
+	enemyBulletHitDetectTemplate(hero, enemy1BulletList);
+	enemyBulletHitDetectTemplate(hero, enemy2BulletList);
 }
 
-void MainGame::heroCrashDetection()
+void MainGame::heroCrashDetect()
 {
 	if (hero.getIsAlive())
 	{
@@ -390,9 +491,9 @@ void MainGame::update()
 		updateHero();
 		updateEnemy();
 		updateBullet();
-		heroBulletHitDetection();
-		enemyBulletHitDetection();
-		heroCrashDetection();
+		heroBulletHitDetect();
+		enemyBulletHitDetect();
+		heroCrashDetect();
 	}
 }
 
@@ -417,10 +518,9 @@ void MainGame::events()
 		if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_SPACE && status == PLAYING && hero.getBombCount() > 0)
 		{
 			hero.releaseBomb();
-
-			heroReleaseBomeTemplate(enemy0List, score);
-			heroReleaseBomeTemplate(enemy1List, score);
-			heroReleaseBomeTemplate(enemy2List, score);
+			heroBomeAttackTemplate(enemy0List, score);
+			heroBomeAttackTemplate(enemy1List, score);
+			heroBomeAttackTemplate(enemy2List, score);
 		}
 	}
 }
